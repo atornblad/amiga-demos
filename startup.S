@@ -6,7 +6,7 @@ Supervisor:     equ -30
 AllocMem:       equ -198
 AllocAbs:       equ -204
 FreeMem:        equ -210
-OpenLibrary:    equ -408
+OldOpenLibrary: equ -408
 CloseLibrary:   equ -414
 MEMF_ANY:       equ $00000
 MEMF_PUBLIC:    equ $00001
@@ -34,9 +34,7 @@ PALETTE0:       equ $180
 ;------ Interrupts
 VBINTVECTOR:    equ $6c
 
-startup:    bsr.w   demoinit                ; Allow demo code to do some OS-friendly stuff before it's all shut down
-
-            move.l  EXECBASE, a6
+startup:    move.l  EXECBASE, a6
             sub.l   a4, a4                  ; Initial guess of VBR (Vector Base Register)
 
             btst    #0, ATTNFLAGS_LO(a6)    ; Check if 68010 or higher is present
@@ -47,10 +45,14 @@ startup:    bsr.w   demoinit                ; Allow demo code to do some OS-frie
 
 .cpuidentified:
             lea     .gfxname(pc), a1        ; Open graphics library
-            jsr     OpenLibrary(a6)
+            jsr     OldOpenLibrary(a6)
             tst.l   d0
-            beq.s   .errorexit
+            beq     .errorexit
             move.l  d0, a5                  ; a5 = graphicsbase
+
+            movem.l a5-a6, -(sp)            ; save a5 and a6
+            bsr.w   demoinit                ; Allow demo code to do some OS-friendly stuff before it's all shut down
+            movem.l (sp)+, a5-a6            ; restore a5 and a6
 
             ; Save interrupt and dma bits
             lea.l   DMABASE, a6
@@ -58,39 +60,43 @@ startup:    bsr.w   demoinit                ; Allow demo code to do some OS-frie
             move.w  DMACONR(a6), -(sp)      ; Push DMACONR
             move.l  VBINTVECTOR(a4), -(sp)  ; Push VBINTVECTOR
 
-            bsr.s   .waiteof                ; Wait for the end of the frame
-            bsr.s   .alloff                 ; Turn off all interrupts and dma
+            bsr     .waiteof                ; Wait for the end of the frame
+            bsr     .alloff                 ; Turn off all interrupts and dma
 
             ; Call the demo main
             movem.l a4-a6, -(sp)            ; Push dmabase, graphics.library, and VBR
-            bsr.w   demomain
+            bsr.w   demomain                ; Call main demo code
             movem.l (sp)+, a4-a6            ; Pop dmabase, bfx, VBR
 
             ; Restore everything
-            bsr.s   .waiteof                ; Wait for the end of the frame
-            bsr.s   .alloff                 ; Turn off all interrupts and dma
+            bsr     .waiteof                ; Wait for the end of the frame
+            bsr     .alloff                 ; Turn off all interrupts and dma
 
             move.l  (sp)+, VBINTVECTOR(a4)  ; Restore VBINTVECTOR
             move.l  38(a5), COP1LC(a6)      ; Restore system copper lists
             move.l  50(a5), COP2LC(a6)
 
+            move.w  #$8000, d2
             move.w  (sp)+, d0               ; Restore DMACON
-            or.w    #$8000, d0
+            or.w    d2, d0
             move.w  d0, DMACON(a6)
 
             move.w  (sp)+, d0               ; Restore INTENA
-            or.w    #$8000, d0
+            or.w    d2, d0
             move.w  d0, INTENA(a6)
 
             move.l  a5, a6                  ; Restore OS screen (graphics.library)
             move.l  34(a6), a1
             jsr     -222(a6)                ; TODO: Find graphics.library function definitions
 
-            move.l  a6, a1                  ; Close graphics.library
+            move.l  a6, -(sp)               ; push gfxbase
+            move.l  a6, a5
+            move.l  EXECBASE, a6
+            bsr.w   demoexit                ; allow demo to clean up in OS-friendly way
+
+            move.l  (sp)+, a1               ; pop gfxbase to a1 and close graphics.library
             move.l  EXECBASE, a6
             jsr     CloseLibrary(a6)
-
-            bsr.w   demoexit
 
 .niceexit:  moveq.l #0, d0
             rts
@@ -104,7 +110,7 @@ startup:    bsr.w   demoinit                ; Allow demo code to do some OS-frie
 .gfxname:   dc.b    "graphics.library", 0, 0
 
 .waiteof:   move.w  #$4000, INTENA(a6)      ; Turn off interrupts completely
-            bsr.s   WaitBlit                ; Wait for blitter to finish
+            bsr     WaitBlit                ; Wait for blitter to finish
 
             move.w  #$138, d0               ; Wait for line $138
 .waitrast:  move.l  VPOSR(a6), d1

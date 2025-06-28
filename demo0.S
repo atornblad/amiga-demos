@@ -1,7 +1,7 @@
             INCLUDE     "startup.S"
 
-demoinit:   move.l  EXECBASE, a6          ; Allocate some memory for copper
-            move.l  #16384, d0
+            ; demoinit called with exec.library in a6, graphics.library in a5
+demoinit:   move.l  #16384, d0                  ; Alloc some memory for a copper list (not used yet)
             move.l  #MEMF_CLEARCHIP, d1
             jsr     AllocMem(a6)
             tst.l   d0
@@ -15,8 +15,8 @@ demoinit:   move.l  EXECBASE, a6          ; Allocate some memory for copper
 .error      moveq.l #1, d0
             rts
 
-demoexit:   move.l  EXECBASE, a6          ; Free copper memory
-            move.l  copperaddr, a1
+            ; demoexit called with exec.library in a6, graphics.library in a5
+demoexit:   move.l  copperaddr, a1
             move.l  #16384, d0
             jsr     FreeMem(a6)
 
