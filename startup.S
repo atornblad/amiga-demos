@@ -28,8 +28,31 @@ COP2LC:         equ $084
 DMACON:         equ $096
 INTENA:         equ $09a
 INTREQ:         equ $09c
+BPL1PTH:        equ $0e0
+BPL1PTL:        equ $0e2
 BPLCON0:        equ $100
-PALETTE0:       equ $180
+COLOR0:         equ $180
+COLOR1:         equ $182
+FMODE:          equ $1fc
+
+CWAIT       MACRO
+            dc.b    (\1&$ff)
+            dc.b    ((\2&$ff)*2+1)
+            dc.w    $fffe
+            ENDM
+
+CPALWAIT    MACRO
+            dc.w    $ffdf, $fffe
+            ENDM
+
+CEND        MACRO
+            dc.w    $ffff, $fffe
+            ENDM
+
+CMOVE       MACRO
+            dc.w    (\1&$1ff)
+            dc.w    \2
+            ENDM
 
 ;------ Interrupts
 VBINTVECTOR:    equ $6c
@@ -51,8 +74,9 @@ startup:    move.l  EXECBASE, a6
             move.l  d0, a5                  ; a5 = graphicsbase
 
             movem.l a5-a6, -(sp)            ; save a5 and a6
-            bsr.w   demoinit                ; Allow demo code to do some OS-friendly stuff before it's all shut down
+            bsr.l   demoinit                ; Allow demo code to do some OS-friendly stuff before it's all shut down
             movem.l (sp)+, a5-a6            ; restore a5 and a6
+                                            ; TODO: If demoinit returns non-zero in d0, close graphics library and quit
 
             ; Save interrupt and dma bits
             lea.l   DMABASE, a6
@@ -65,7 +89,7 @@ startup:    move.l  EXECBASE, a6
 
             ; Call the demo main
             movem.l a4-a6, -(sp)            ; Push dmabase, graphics.library, and VBR
-            bsr.w   demomain                ; Call main demo code
+            bsr.l   demomain                ; Call main demo code
             movem.l (sp)+, a4-a6            ; Pop dmabase, bfx, VBR
 
             ; Restore everything
@@ -92,7 +116,7 @@ startup:    move.l  EXECBASE, a6
             move.l  a6, -(sp)               ; push gfxbase
             move.l  a6, a5
             move.l  EXECBASE, a6
-            bsr.w   demoexit                ; allow demo to clean up in OS-friendly way
+            bsr.l   demoexit                ; allow demo to clean up in OS-friendly way
 
             move.l  (sp)+, a1               ; pop gfxbase to a1 and close graphics.library
             move.l  EXECBASE, a6
@@ -109,21 +133,22 @@ startup:    move.l  EXECBASE, a6
 
 .gfxname:   dc.b    "graphics.library", 0, 0
 
+.alloff:    move.w  #$7fff, d2
+            move.w  d2, DMACON(a6)
+            move.w  d2, INTENA(a6)
+            move.w  d2, INTREQ(a6)
+            rts
+
 .waiteof:   move.w  #$4000, INTENA(a6)      ; Turn off interrupts completely
             bsr     WaitBlit                ; Wait for blitter to finish
 
+Wait138:
             move.w  #$138, d0               ; Wait for line $138
 .waitrast:  move.l  VPOSR(a6), d1
             lsr.l   #8, d1
             and.w   #$1ff, d1
             cmp.w   d0, d1
             bne.s   .waitrast
-            rts
-
-.alloff:    move.w  #$7fff, d2
-            move.w  d2, DMACON(a6)
-            move.w  d2, INTENA(a6)
-            move.w  d2, INTREQ(a6)
             rts
 
 WaitBlit:   ;tst.w   (a6)                   ; This instruction is only necessary for A1000 compatibility
