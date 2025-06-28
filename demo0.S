@@ -24,7 +24,6 @@ demoexit:   move.l  copperaddr, a1
 
 demomain:   move.w  #$87e0, DMACON(a6)  ; Enable some DMA
             move.l  #copper, COP1LC(a6)
-            move.w  #$0a29, PALETTE0(a6)
 
 waitmouse:
             btst #6, $bfe001            ; Check mouse button state
@@ -45,9 +44,9 @@ copper:     dc.w    $01fc,      $0000   ; Enable slow fetch mode for AGA compati
             dc.w    PALETTE0,   $023a   ; Dark blue background
 
             dc.w    $ffdf,      $fffe   ; Wait for end of 8 bit V resolution
-            dc.w    $1907,      $fffe   ; Wait for line $139
+            dc.w    $1907,      $fffe   ; Wait for line $119
             dc.w    PALETTE0,   $034b   ; Dark blue background
-            dc.w    $1c07,      $fffe   ; Wait for line $13c
+            dc.w    $1c07,      $fffe   ; Wait for line $11c
             dc.w    PALETTE0,   $0000   ; Black background
 
             dc.w    $ffff,      $fffe   ; End of copper list
