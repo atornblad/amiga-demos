@@ -25,12 +25,16 @@ VHPOSR:         equ $006
 INTENAR:        equ $01c
 COP1LC:         equ $080
 COP2LC:         equ $084
+DDFSTRT:        equ $092
+DDFSTOP:        equ $094
 DMACON:         equ $096
 INTENA:         equ $09a
 INTREQ:         equ $09c
 BPL1PTH:        equ $0e0
 BPL1PTL:        equ $0e2
 BPLCON0:        equ $100
+BPL1MOD:        equ $108
+BPL2MOD:        equ $10a
 COLOR0:         equ $180
 COLOR1:         equ $182
 FMODE:          equ $1fc

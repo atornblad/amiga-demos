@@ -14,5 +14,5 @@ demoinit:   move.l  #163840, d0                 ; Alloc some memory for bitmaps 
             moveq.l #0, d0
             rts
 
-.error      moveq.l #1, d0
+.error:     moveq.l #1, d0
             rts
