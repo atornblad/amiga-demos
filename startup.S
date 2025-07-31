@@ -151,7 +151,7 @@ startup:    move.l  EXECBASE, a6
 wait136:
             move.w  #$136, d0               ; Wait for line $138
 .waitrast:  move.l  VPOSR(a6), d1
-            move.w  d1, COLOR0(a6)
+            ; move.w  d1, COLOR0(a6)          ; Debug
             lsr.l   #8, d1
             and.w   #$1ff, d1
             cmp.w   d0, d1
