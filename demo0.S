@@ -3,12 +3,15 @@
             INCLUDE     "demo0exit.S"
             INCLUDE     "demo0part1.S"
             INCLUDE     "demo0part2.S"
+            INCLUDE     "algaud.S"
 
 ******************************************************************
 *** MAIN
 ******************************************************************
 
-demomain:   move.w  #$83cf, DMACON(a6)  ; Enable some DMA: audio, blitter, copper, bitplane, not disk or sprite
+            SECTION code, CODE
+
+demomain:   move.w  #$83c1, DMACON(a6)  ; Enable some DMA: audio, blitter, copper, bitplane, not disk or sprite
 demopart:   move.l  partptr, a4         ; Get the init jump address of the current part section
             move.l  (a4), d0
             tst.l   d0                  ; Is it null?
@@ -20,6 +23,7 @@ demopart:   move.l  partptr, a4         ; Get the init jump address of the curre
             move.l  (sp)+, a4           ; Pull the part section pointer
 
 demoloop:   jsr     wait136             ; Wait for raster line $136 (end of screen) (a4 not destroyed)
+            jsr     aa_loop             ; Music
             move.l  a4, -(sp)           ; Store the part section pointer
             addq.l  #4, a4              ; Move a4 forward to the next jump pointer (current part loop subroutine)
             move.l  (a4), a4            ; Get the loop jump address of the current part section

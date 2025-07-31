@@ -1,4 +1,4 @@
-            SECTION part2_code, CODE
+            SECTION code, CODE
 
 p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper list
             move.w  d0, (p2cprbmps+6)

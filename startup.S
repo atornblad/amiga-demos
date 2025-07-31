@@ -53,6 +53,16 @@ DDFSTOP:        equ $094
 DMACON:         equ $096
 INTENA:         equ $09a
 INTREQ:         equ $09c
+AUD0LC:         equ $0a0
+AUD0LEN:        equ $0a4
+AUD0PER:        equ $0a6
+AUD0VOL:        equ $0a8
+AUD1LC:         equ $0b0
+AUD1VOL:        equ $0b8
+AUD2LC:         equ $0c0
+AUD2VOL:        equ $0c8
+AUD3LC:         equ $0d0
+AUD3VOL:        equ $0d8
 BPL1PTH:        equ $0e0
 BPL1PTL:        equ $0e2
 BPLCON0:        equ $100
@@ -83,6 +93,8 @@ CMOVE       MACRO
 
 ;------ Interrupts
 VBINTVECTOR:    equ $6c
+
+            SECTION code, CODE
 
 startup:    move.l  EXECBASE, a6
             sub.l   a4, a4                  ; Initial guess of VBR (Vector Base Register)
@@ -149,7 +161,13 @@ startup:    move.l  EXECBASE, a6
             move.l  EXECBASE, a6
             jsr     CloseLibrary(a6)
 
-.niceexit:  moveq.l #0, d0
+.niceexit:  lea.l   DMABASE, a6
+            clr.w   AUD0VOL(a6)
+            clr.w   AUD1VOL(a6)
+            clr.w   AUD2VOL(a6)
+            clr.w   AUD3VOL(a6)
+
+            moveq.l #0, d0
             rts
 
 .errorexit: moveq.l #103, d0
