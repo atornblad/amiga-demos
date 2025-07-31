@@ -93,7 +93,7 @@ startup:    move.l  EXECBASE, a6
 
             ; Call the demo main
             movem.l a4-a6, -(sp)            ; Push dmabase, graphics.library, and VBR
-            bsr.l   demomain                ; Call main demo code
+            jsr     demomain                ; Call main demo code
             movem.l (sp)+, a4-a6            ; Pop dmabase, bfx, VBR
 
             ; Restore everything
