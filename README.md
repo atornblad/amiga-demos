@@ -12,4 +12,7 @@ The `startup.S` file is almost 100 % identical with the wrapper code written by 
  - http://amiga-dev.wikidot.com/information:hardware
  - https://wiki.amigaos.net/wiki/Main_Page
  - https://68k.hax.com/
+ - https://mrjester.hapisan.com/04_MC68/CycleTimes.htm
  - http://cd.textfiles.com/directory.html
+ - https://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0240.html
+ - https://www.winnicki.net/amiga/memmap/

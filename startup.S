@@ -144,9 +144,9 @@ startup:    move.l  EXECBASE, a6
             rts
 
 .waiteof:   move.w  #$4000, INTENA(a6)      ; Turn off interrupts completely
-            bsr     WaitBlit                ; Wait for blitter to finish
+            bsr     waitblit                ; Wait for blitter to finish
 
-Wait138:
+wait138:
             move.w  #$138, d0               ; Wait for line $138
 .waitrast:  move.l  VPOSR(a6), d1
             lsr.l   #8, d1
@@ -155,7 +155,7 @@ Wait138:
             bne.s   .waitrast
             rts
 
-WaitBlit:   ;tst.w   (a6)                   ; This instruction is only necessary for A1000 compatibility
+waitblit:   ;tst.w   (a6)                   ; This instruction is only necessary for A1000 compatibility
 .loop:      btst    #6, 2(a6)
             bne.s   .loop
             rts

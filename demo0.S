@@ -14,10 +14,7 @@ demomain:   move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             move.w  #$83cf, DMACON(a6)  ; Enable some DMA: audio, blitter, copper, bitplane, not disk or sprite
             move.l  #copper, COP1LC(a6)
 
-.btnrellp:  btst    #6, $bfe001         ; First wait for user to release mouse button after double-clicking
-            beq     .btnrellp
-
-demoloop:   bsr     Wait138             ; Wait for raster line $138 (end of screen)
+demoloop:   bsr     wait138             ; Wait for raster line $138 (end of screen)
 
             move.w  top_y, d0
             move.w  top_dy, d1
@@ -55,12 +52,14 @@ top_y:      dc.w    $03c0
 top_dy:     dc.w    0
 btn_state:  dc.w    0
 
+
+
             SECTION vars, BSS           ; Uninitialized data block
 bitmapaddr: ds.l    1
 
+
+
             SECTION copper, DATA_C
-
-
 
 copper:     CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compatibility
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
