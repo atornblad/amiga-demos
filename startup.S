@@ -23,6 +23,27 @@ DMACONR:        equ $002
 VPOSR:          equ $004
 VHPOSR:         equ $006
 INTENAR:        equ $01c
+BLTCON0:        equ $040
+BLTCON1:        equ $042
+BLTAFWM:        equ $044
+BLTALWM:        equ $046
+BLTCPT:         equ $048
+BLTCPTH:        equ BLTCPT
+BLTCPTL:        equ (BLTCPTH+2)
+BLTBPT:         equ $04c
+BLTBPTH:        equ BLTBPT
+BLTBPTL:        equ (BLTBPTH+2)
+BLTAPT:         equ $050
+BLTAPTH:        equ BLTAPT
+BLTAPTL:        equ (BLTAPTH+2)
+BLTDPT:         equ $054
+BLTDPTH:        equ BLTDPT
+BLTDPTL:        equ (BLTDPTH+2)
+BLTSIZE:        equ $058
+BLTCMOD:        equ $060
+BLTBMOD:        equ $062
+BLTAMOD:        equ $064
+BLTDMOD:        equ $066
 COP1LC:         equ $080
 COP2LC:         equ $084
 COPJMP1:        equ $088
@@ -159,6 +180,9 @@ wait136:
             rts
 
 waitblit:   ;tst.w   (a6)                   ; This instruction is only necessary for A1000 compatibility
-.loop:      btst    #6, 2(a6)
+.loop:
+            ;move.w  d3, COLOR0(a6)          ; Debug
+            ;addq.w  #3, d3
+            btst    #6, 2(a6)
             bne.s   .loop
             rts

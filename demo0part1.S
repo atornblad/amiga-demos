@@ -9,7 +9,7 @@ p1init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             clr.w   COPJMP1(a6)
             rts
 
-p1loop:                               ; Move the top raster thing up and down
+p1loop:                                 ; Move the top raster thing up and down
             move.w  p1top_y, d0         ; Y position
             move.w  p1top_dy, d1        ; Y speed (times 16)
             add.w   d1, d0              ; Add speed to position
@@ -20,6 +20,24 @@ p1loop:                               ; Move the top raster thing up and down
             bra.s   .sdone              ; And done
 .decr       subq    #1, d1              ; Decrement
 .sdone      move.w  d1, p1top_dy        ; Store the Y speed back
+
+            move.l  bitmapaddr, a0      ; Just to see if anything is visible...
+
+            jsr     waitblit            ; Copy word to 320x256 bitfield
+            move.l  a0, BLTAPT(a6)
+            move.w  d0, (a0)+            ; Write one word
+            move.w  d0, (a0)+            ; Write one word
+            ;addq.l  #2, a0
+            move.l  a0, BLTDPT(a6)
+            move.w  #$09f0, BLTCON0(a6)
+            move.w  #$0000, BLTCON1(a6)
+            move.w  #$ffff, BLTAFWM(a6)
+            move.w  #$ffff, BLTALWM(a6)
+            move.w  #0, BLTAMOD(a6)
+            move.w  #0, BLTDMOD(a6)
+            move.w  #(256<<6+20), BLTSIZE(a6)   ; 256 rows by 20 words copied, starts blitter
+
+            jsr     waitblit            ; Copy word to 320x256 bitfield
 
             asr.w   #4, d0              ; Divide by 16
             move.b  d0, p1topy_cpr      ; Poke the copper
