@@ -23,19 +23,12 @@ p1loop:                                 ; Move the top raster thing up and down
 
             move.l  bitmapaddr, a0      ; Just to see if anything is visible...
 
-            jsr     waitblit            ; Copy word to 320x256 bitfield
-            move.l  a0, BLTAPT(a6)
-            move.w  d0, (a0)+            ; Write one word
-            move.w  d0, (a0)+            ; Write one word
-            ;addq.l  #2, a0
+            jsr     waitblit            ; Clear the bitfield first
             move.l  a0, BLTDPT(a6)
-            move.w  #$09f0, BLTCON0(a6)
+            move.w  #$0100, BLTCON0(a6)
             move.w  #$0000, BLTCON1(a6)
-            move.w  #$ffff, BLTAFWM(a6)
-            move.w  #$ffff, BLTALWM(a6)
-            move.w  #0, BLTAMOD(a6)
             move.w  #0, BLTDMOD(a6)
-            move.w  #(256<<6+20), BLTSIZE(a6)   ; 256 rows by 20 words copied, starts blitter
+            move.w  #(256<<6+20), BLTSIZE(a6)   ; 256 rows by 20 words cleared, starts blitter
 
             jsr     waitblit            ; Copy word to 320x256 bitfield
 
