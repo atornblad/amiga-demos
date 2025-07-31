@@ -13,8 +13,6 @@ demoinit:   move.l  #163840, d0                 ; Alloc some memory for bitmaps 
 
             move.l  d0, bitmapaddr
 
-            jsr     aa_init
-
 .btnrellp:  btst    #6, $bfe001         ; First wait for user to release mouse button after double-clicking
             beq     .btnrellp
 
