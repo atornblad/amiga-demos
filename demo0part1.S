@@ -6,6 +6,7 @@ p1init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             move.w  d0, (p1cprbmps+2)
 
             move.l  #p1copper, COP1LC(a6)
+            clr.w   COPJMP1(a6)
             rts
 
 p1loop:                               ; Move the top raster thing up and down

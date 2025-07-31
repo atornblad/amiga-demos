@@ -25,6 +25,8 @@ VHPOSR:         equ $006
 INTENAR:        equ $01c
 COP1LC:         equ $080
 COP2LC:         equ $084
+COPJMP1:        equ $088
+COPJMP2:        equ $08a
 DDFSTRT:        equ $092
 DDFSTOP:        equ $094
 DMACON:         equ $096
@@ -146,9 +148,10 @@ startup:    move.l  EXECBASE, a6
 .waiteof:   move.w  #$4000, INTENA(a6)      ; Turn off interrupts completely
             bsr     waitblit                ; Wait for blitter to finish
 
-wait138:
-            move.w  #$138, d0               ; Wait for line $138
+wait136:
+            move.w  #$136, d0               ; Wait for line $138
 .waitrast:  move.l  VPOSR(a6), d1
+            move.w  d1, COLOR0(a6)
             lsr.l   #8, d1
             and.w   #$1ff, d1
             cmp.w   d0, d1

@@ -19,7 +19,7 @@ demopart:   move.l  partptr, a4         ; Get the init jump address of the curre
             jsr     (a3)                ; Jump to the demo part init subroutine
             move.l  (sp)+, a4           ; Pull the part section pointer
 
-demoloop:   jsr     wait138             ; Wait for raster line $138 (end of screen) (a4 not destroyed)
+demoloop:   jsr     wait136             ; Wait for raster line $136 (end of screen) (a4 not destroyed)
             move.l  a4, -(sp)           ; Store the part section pointer
             addq.l  #4, a4              ; Move a4 forward to the next jump pointer (current part loop subroutine)
             move.l  (a4), a4            ; Get the loop jump address of the current part section
