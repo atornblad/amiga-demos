@@ -24,9 +24,9 @@ p2loop:     ;; CLEAR THE SCREEN
             ;; Draw line from (20, 30) -- (40, 75)
             ;; Assumption, y2>=y1, always!
             ;; Knowledge source: http://www.amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0129.html
-            move.w  #20, d0         ; d0 = x1
+            move.w  #100, d0         ; d0 = x1
             move.w  #30, d1         ; d1 = y1 (scrapped soon)
-            move.w  #40, d2         ; d2 = x2
+            move.w  #10, d2         ; d2 = x2
             move.w  #75, d3         ; d3 = y2 (scrapped soon)
             move.l  bitmapaddr, a0
             lea     octants, a2
@@ -51,13 +51,13 @@ p2loop:     ;; CLEAR THE SCREEN
             tst.w   d4
             bpl.s   .nonegd4
             neg.w   d4
-            addq    #1, d7          ; x moves to the left, d7 += 1
+            addq    #2, d7          ; x moves to the left, d7 += 1 word
 .nonegd4:                           ; d4 = abs(x2 - x1) (8)
             sub.w   d1, d3          ; d3 = abs(y2 - y1) (5)         ; Last use of d1 (y1)
             cmp.w   d4, d3
             bge.s   .d3largest
             exg     d4, d3
-            addq    #2, d7          ; dx < dy: d7 += 2
+            addq    #4, d7          ; dx < dy: d7 += 2 words
 .d3largest:                         ; d3 = dx = max(abs(x2 - x1), abs(y2 - y1)) (8)
                                     ; d4 = dy = min(abs(x2 - x1), abs(y2 - y1)) (5)
             move.w  d4, d5
@@ -72,7 +72,7 @@ p2loop:     ;; CLEAR THE SCREEN
             ; d7 = 2: Octant 7 (value 4) ---- ---- ---1 00-1 $0011
             ; d7 = 3: Octant 4 (value 5) ---- ---- ---1 01-1 $0013
 
-            move.w  (a2, d7), d1
+            move.w  0(a2,d7.w), d1
 
             ; Finally: calculate BLTSIZE (d3 + 1) << 6 | 2
             asl.w   #6, d3
@@ -119,7 +119,7 @@ p2loop:     ;; CLEAR THE SCREEN
             SECTION vars_initialized, DATA
 
 p2frame     dc.w    0
-octants     dc.w    $0000, $0005, $0011, $0013
+octants     dc.w    $0001, $0009, $0011, $0015
 
             SECTION copper, DATA_C
 
