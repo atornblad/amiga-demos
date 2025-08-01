@@ -26,7 +26,7 @@ p2loop:     ;; CLEAR THE SCREEN
             ;; Knowledge source: http://www.amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0129.html
             move.w  #100, d0         ; d0 = x1
             move.w  #30, d1         ; d1 = y1 (scrapped soon)
-            move.w  #10, d2         ; d2 = x2
+            move.w  p2frame, d2         ; d2 = x2
             move.w  #75, d3         ; d3 = y2 (scrapped soon)
             move.l  bitmapaddr, a0
             lea     octants, a2
@@ -37,7 +37,7 @@ p2loop:     ;; CLEAR THE SCREEN
             move.w  d1, d4
             mulu    #20, d4
             move.w  d0, d5
-            asr.w   #3, d5
+            asr.w   #4, d5
             add.l   d5, d4
             asl.l   #1, d4
             move.l  a0, a1
@@ -88,7 +88,7 @@ p2loop:     ;; CLEAR THE SCREEN
             sub.w   d6, d5
             ; If 4dy-2dx < 0 (current d5), set SIGN flag in BLTCON1(d1)
             bpl.s   .nosign
-            or.w    #$0002, d1
+            or.w    #$0040, d1
 .nosign:    ext.l   d5
             move.l  d5, BLTAPT(a6)  ; 4 * dy - 2 * dx
             sub.w   d6, d5
@@ -119,7 +119,7 @@ p2loop:     ;; CLEAR THE SCREEN
             SECTION vars_initialized, DATA
 
 p2frame     dc.w    0
-octants     dc.w    $0001, $0009, $0011, $0015
+octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 
             SECTION copper, DATA_C
 

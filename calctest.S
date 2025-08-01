@@ -17,7 +17,7 @@ main:       move.w  #20, d0         ; d0 = x1
             move.w  d1, d4
             mulu    #20, d4
             move.w  d0, d5
-            asr.w   #3, d5
+            asr.w   #4, d5
             add.l   d5, d4
             asl.l   #1, d4
             move.l  #0, a1 ; a0, a1
