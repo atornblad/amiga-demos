@@ -21,16 +21,35 @@ p2loop:     ;; CLEAR THE SCREEN
                                                 ; the first data to the BLT registers!
 
             ;; Draw some lines
-            ;; Draw line from (20, 30) -- (40, 75)
-            ;; Assumption, y2>=y1, always!
-            ;; Knowledge source: http://www.amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0129.html
+            move.l  bitmapaddr, a0
+            lea     octants, a2
+
             move.w  #100, d0         ; d0 = x1
             move.w  #30, d1         ; d1 = y1 (scrapped soon)
             move.w  p2frame, d2         ; d2 = x2
             move.w  #75, d3         ; d3 = y2 (scrapped soon)
-            move.l  bitmapaddr, a0
-            lea     octants, a2
+            movem.w d2-d3, -(a7)    ; Push x2, y2
+            bsr     .drawdownsingle
+            
+            movem.w (a7)+, d0-d1    ; Pop into x1, y1
+            move.w  #160, d2
+            move.w  #180, d3
+            bsr     .drawdownsingle
 
+.countdown: lea     p2frame, a4
+            move.w  (a4), d0
+            addq.w  #1, d0
+            move.w  d0, (a4)
+            cmp.w   #250, d0            ; 5 seconds
+            bhi.s   .p2done
+            clr.w   d0
+.p2done:    rts                         ; non-zero exit after 5 seconds
+
+
+            ;; Knowledge source: http://www.amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0129.html
+            ;; Call with d0:x1, d1:y1, d2:x2, d3:y2, bitmap:a0, octants:a2
+            ;; y2 >= y1
+.drawdownsingle:
             ;; Calculate address of first word into a0
             clr.l   d4
             clr.l   d5
@@ -106,15 +125,9 @@ p2loop:     ;; CLEAR THE SCREEN
             move.w  d1, BLTCON1(a6)
             move.w  d3, BLTSIZE(a6)
 
+            rts
 
-.countdown: lea     p2frame, a4
-            move.w  (a4), d0
-            addq.w  #1, d0
-            move.w  d0, (a4)
-            cmp.w   #250, d0            ; 5 seconds
-            bhi.s   .p2done
-            clr.w   d0
-.p2done:    rts                         ; non-zero exit after 5 seconds
+
 
             SECTION vars_initialized, DATA
 
