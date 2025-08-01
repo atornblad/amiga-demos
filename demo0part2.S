@@ -94,12 +94,17 @@ p2loop:     ;; Double buffering
 .transformd2d3:
             ; Don't touch d0, d1, d7, a3
             move.w  p2frame, d4
-            and.w   #$00ae, d4
+            asr.w   #2, d4
+            ; and.w   #$00ae, d4
             mulu    #17, d4
             add.w   d3, d4
             mulu    #5, d4
+            add.w   d2, d4
+            mulu    #3, d4
             move.w  p2frame, d5
-            and.w   #$006b, d5
+            addq    #2, d5
+            asr.w   #2, d5
+            ; and.w   #$006b, d5
             mulu    #3, d5
             add.w   d2, d5
             mulu    #7, d5
@@ -210,7 +215,7 @@ p2loop:     ;; Double buffering
 
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
-p2polys     dc.w    6       ; 6 lines (outer shell of D)
+p2polys     dc.w    6       ; 6 lines (outer D)
             dc.w     10, 40
             dc.w     10, 90
             dc.w     40, 90
@@ -226,14 +231,60 @@ p2polys     dc.w    6       ; 6 lines (outer shell of D)
             dc.w     23, 55
 
             dc.w    7       ; 7 lines (E)
-            dc.w    55, 40
-            dc.w    95, 49
-            dc.w    65, 58
-            dc.w    85, 65
-            dc.w    65, 72
-            dc.w    95, 81
-            dc.w    55, 90
-            dc.w    55, 40
+            dc.w     55, 40
+            dc.w     95, 49
+            dc.w     65, 58
+            dc.w     85, 65
+            dc.w     65, 72
+            dc.w     95, 81
+            dc.w     55, 90
+            dc.w     55, 40
+
+            dc.w    7       ; 7 lines (F)
+            dc.w    100, 40
+            dc.w    140, 49
+            dc.w    110, 58
+            dc.w    130, 65
+            dc.w    110, 72
+            dc.w    110, 90
+            dc.w    100, 90
+            dc.w    100, 40
+
+            dc.w    4       ; 4 lines (I)
+            dc.w    140, 40
+            dc.w    150, 40
+            dc.w    150, 90
+            dc.w    140, 90
+            dc.w    140, 40
+
+            dc.w    7       ; 7 lines (outer A)
+            dc.w    150, 90
+            dc.w    170, 40
+            dc.w    190, 90
+            dc.w    180, 90
+            dc.w    172, 80
+            dc.w    168, 80
+            dc.w    160, 90
+            dc.w    150, 90
+
+            dc.w    3       ; 3 lines (hole of A)
+            dc.w    170, 55
+            dc.w    174, 65
+            dc.w    166, 65
+            dc.w    170, 55
+
+            dc.w    10      ; 10 lines (N)
+            dc.w    195, 40
+            dc.w    205, 40
+            dc.w    225, 65
+            dc.w    225, 40
+            dc.w    235, 40
+            dc.w    235, 90
+            dc.w    225, 90
+            dc.w    205, 65
+            dc.w    205, 90
+            dc.w    195, 90
+            dc.w    195, 40
 
             dc.w    0       ; No more polygons
 
