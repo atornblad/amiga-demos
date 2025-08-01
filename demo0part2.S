@@ -27,6 +27,7 @@ p2loop:     ;; Double buffering
             add.l   bitmapaddr, d2
 
             ;; CLEAR THE SCREEN
+            ;; TODO: Keep track of how much to clean up for each buffer
             jsr     waitblit
             ;move.l  d2, a0                      ; Target buffer
             move.l  d2, BLTDPT(a6)
@@ -41,23 +42,28 @@ p2loop:     ;; Double buffering
             move.l  d2, a0
             lea     octants, a2
 
-            move.w  #100, d0         ; d0 = x1
-            move.w  #30, d1         ; d1 = y1 (scrapped soon)
-            move.w  p2frame, d2         ; d2 = x2
-            move.w  #75, d3         ; d3 = y2 (scrapped soon)
-            movem.w d2-d3, -(a7)    ; Push x2, y2
-            bsr     .drawdownsingle
-            
-            movem.w (a7)+, d0-d1    ; Pop into x1, y1
-            move.w  #160, d2
-            move.w  #180, d3
-            movem.w d2-d3, -(a7)    ; Push x2, y2
-            bsr     .drawdownsingle
+            lea     p2polys, a3
+.polysloop: move.w  (a3)+, d7       ; Number of lines
+            tst.w   d7
+            beq.s   .polysend
+            ; TODO: Swap the order of the stored coordinates so that we can
+            ;       read y,x into d1-d0 or d3-d2 using MOVEM
+            move.w  (a3)+, d2
+            move.w  (a3)+, d3
+            bsr     .transformd2d3
+            move.w  d2, d0
+            move.w  d3, d1
+.onepoly:   move.w  (a3)+, d2
+            move.w  (a3)+, d3
+            bsr     .transformd2d3
+            movem.l d2-d3/d7/a3, -(sp)      ; Push x2, y2, loop, pointer
+            bsr     .drawsingle
+            movem.l (sp)+, d0-d1/d7/a3      ; Pop x1, y1, loop, pointer
+            subq.w  #1, d7
+            bne.s   .onepoly
+            bra.s   .polysloop
 
-            move.w  #100, d0         ; d0 = x1
-            move.w  #30, d1         ; d1 = y1 (scrapped soon)
-            movem.w (a7)+, d2-d3    ; Pop back into x2, y2
-            bsr     .drawdownsingle
+.polysend:
 
             ;; FILL
             ;; This is a naive fill that fills the entire width of the screen
@@ -85,6 +91,36 @@ p2loop:     ;; Double buffering
 .p2done:    rts                         ; non-zero exit after 5 seconds
 
 
+.transformd2d3:
+            ; Don't touch d0, d1, d7, a3
+            move.w  p2frame, d4
+            and.w   #$00ae, d4
+            mulu    #17, d4
+            add.w   d3, d4
+            mulu    #5, d4
+            move.w  p2frame, d5
+            and.w   #$006b, d5
+            mulu    #3, d5
+            add.w   d2, d5
+            mulu    #7, d5
+            eor.w   d5, d4
+            and.w   #7, d4
+            add.w   d4, d2
+            and.w   #7, d5
+            add.w   d5, d3
+            rts
+
+
+            ;; Call with d0:x1, d1:y1, d2:x2, d3:y2, bitmap:a0, octants:a2
+            ;; Any y direction
+.drawsingle
+            cmp.w   d1, d3
+            bne.s   .noskip
+            rts
+.noskip:    bhi.s   .noswap
+            exg     d0, d2
+            exg     d1, d3
+.noswap:
             ;; Knowledge source: http://www.amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0129.html
             ;; Call with d0:x1, d1:y1, d2:x2, d3:y2, bitmap:a0, octants:a2
             ;; y2 >= y1
@@ -174,6 +210,32 @@ p2loop:     ;; Double buffering
 
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
+p2polys     dc.w    6       ; 6 lines (outer shell of D)
+            dc.w     10, 40
+            dc.w     10, 90
+            dc.w     40, 90
+            dc.w     50, 80
+            dc.w     50, 50
+            dc.w     40, 40
+            dc.w     10, 40
+
+            dc.w    3       ; 3 lines (hole of D)
+            dc.w     23, 55
+            dc.w     23, 75
+            dc.w     37, 65
+            dc.w     23, 55
+
+            dc.w    7       ; 7 lines (E)
+            dc.w    55, 40
+            dc.w    95, 49
+            dc.w    65, 58
+            dc.w    85, 65
+            dc.w    65, 72
+            dc.w    95, 81
+            dc.w    55, 90
+            dc.w    55, 40
+
+            dc.w    0       ; No more polygons
 
             SECTION copper, DATA_C
 
