@@ -44,6 +44,9 @@ BLTCMOD:        equ $060
 BLTBMOD:        equ $062
 BLTAMOD:        equ $064
 BLTDMOD:        equ $066
+BLTCDAT:        equ $070
+BLTBDAT:        equ $072
+BLTADAT:        equ $074
 COP1LC:         equ $080
 COP2LC:         equ $084
 COPJMP1:        equ $088
