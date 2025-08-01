@@ -72,6 +72,7 @@ p2loop:     ;; CLEAR THE SCREEN
             ;; Call with d0:x1, d1:y1, d2:x2, d3:y2, bitmap:a0, octants:a2
             ;; y2 >= y1
 .drawdownsingle:
+            subq    #1, d3
             ;; Calculate address of first word into a0
             clr.l   d4
             clr.l   d5
@@ -84,8 +85,8 @@ p2loop:     ;; CLEAR THE SCREEN
             move.l  a0, a1
             add.l   d4, a1
 
-            ;; "dx" = max(abs(x2 - x1), abs(y2 - y1))
-            ;; "dy" = min(abs(x2 - x1), abs(y2 - y1))
+            ;; dmax = max(abs(x2 - x1), abs(y2 - y1))
+            ;; dmin = min(abs(x2 - x1), abs(y2 - y1))
             clr.w   d7              ; Helper variable for calculating octant
             sub.w   d0, d2          ; d2 = x2 - x1 (-8)
             move.w  d2, d4
@@ -99,12 +100,12 @@ p2loop:     ;; CLEAR THE SCREEN
             bge.s   .d3largest
             exg     d4, d3
             addq    #4, d7          ; dx < dy: d7 += 2 words
-.d3largest:                         ; d3 = dx = max(abs(x2 - x1), abs(y2 - y1)) (8)
-                                    ; d4 = dy = min(abs(x2 - x1), abs(y2 - y1)) (5)
+.d3largest:                         ; d3 = dmax = max(abs(x2 - x1), abs(y2 - y1)) (8)
+                                    ; d4 = dmin = min(abs(x2 - x1), abs(y2 - y1)) (5)
             move.w  d4, d5
-            asl.w   #2, d5          ; d5 = 4 * dy
+            asl.w   #2, d5          ; d5 = 4 * dmin
             move.w  d3, d6
-            asl.w   #1, d6          ; d6 = 2 * dx
+            asl.w   #1, d6          ; d6 = 2 * dmax
 
             ; Figure out octant number for bits 4-2 of BLTCON1 and put BLTCON1 into d1
             ; Last bit set is LINE
@@ -116,6 +117,7 @@ p2loop:     ;; CLEAR THE SCREEN
             move.w  0(a2,d7.w), d1
 
             ; Finally: calculate BLTSIZE d3 << 6 | 2
+            addq.w  #1, d3
             asl.w   #6, d3
             addq.w  #2, d3          ; d3 = BLTSIZE
 
@@ -125,15 +127,15 @@ p2loop:     ;; CLEAR THE SCREEN
             move.w  d7, BLTBDAT(a6) ; ffff
             move.w  d7, BLTAFWM(a6) ; ffff
             move.w  d7, BLTALWM(a6) ; ffff
-            move.w  d5, BLTBMOD(a6) ; 4 * dy
+            move.w  d5, BLTBMOD(a6) ; 4 * dmin
             sub.w   d6, d5
-            ; If 4dy-2dx < 0 (current d5), set SIGN flag in BLTCON1(d1)
+            ; If 4dy-2dmax < 0 (current d5), set SIGN flag in BLTCON1(d1)
             bpl.s   .nosign
             or.w    #$0040, d1
 .nosign:    ext.l   d5
-            move.l  d5, BLTAPT(a6)  ; 4 * dy - 2 * dx
+            move.l  d5, BLTAPT(a6)  ; 4 * dmin - 2 * dmax
             sub.w   d6, d5
-            move.w  d5, BLTAMOD(a6) ; 4 * dy - 4 * dx
+            move.w  d5, BLTAMOD(a6) ; 4 * dmin - 4 * dmax
             move.w  #40, d7
             move.w  d7, BLTCMOD(a6) ; width of bpl in bytes
             move.w  d7, BLTDMOD(a6) ; ditto
