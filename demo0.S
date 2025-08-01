@@ -53,8 +53,8 @@ demoloop:   jsr     wait136             ; Wait for raster line $136 (end of scre
 btn_state:  dc.w    0
 partptr:    dc.l    parts
 
-parts:      dc.l    p1init, p1loop
-            dc.l    p2init, p2loop
+parts:      ;dc.l    p1init, p1loop      ; This is just for experimentation
+            dc.l    p2init, p2loop      ; This is the real "part 1"
             dc.l    0
 
 
