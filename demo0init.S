@@ -5,7 +5,7 @@
             SECTION code, CODE
 
             ; demoinit called with exec.library in a6, graphics.library in a5
-demoinit:   move.l  #163840, d0                 ; Alloc some memory for bitmaps (not used yet)
+demoinit:   move.l  #40*256*2, d0       ; Alloc 2 bitplanes (double buffering one bitplane)
             move.l  #MEMF_CLEARCHIP, d1
             jsr     AllocMem(a6)
             tst.l   d0

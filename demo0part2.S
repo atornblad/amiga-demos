@@ -9,10 +9,27 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             clr.w   COPJMP1(a6)
             rts
 
-p2loop:     ;; CLEAR THE SCREEN
+p2loop:     ;; Double buffering
+            move.w  p2frame, d0
+            moveq   #1, d1
+            moveq   #1, d2
+            and.w   d0, d1              ; d1: 0 or 1 - which buffer to show
+            addq.w  #1, d0
+            and.w   d0, d2              ; d2: 0 or 1 - which buffer to draw in
+
+            mulu.w  #40*256, d1
+            add.l   bitmapaddr, d1
+            move.w  d1, (p2cprbmps+6)
+            swap    d1
+            move.w  d1, (p2cprbmps+2)
+
+            mulu.w  #40*256, d2
+            add.l   bitmapaddr, d2
+
+            ;; CLEAR THE SCREEN
             jsr     waitblit
-            move.l  bitmapaddr, a0      ; Just to see if anything is visible...
-            move.l  a0, BLTDPT(a6)
+            ;move.l  d2, a0                      ; Target buffer
+            move.l  d2, BLTDPT(a6)
             move.w  #$0100, BLTCON0(a6)         ; Use only D channel (destination), zero minterm
             move.w  #$0000, BLTCON1(a6)
             move.w  #0, BLTDMOD(a6)             ; No modulo
@@ -21,7 +38,7 @@ p2loop:     ;; CLEAR THE SCREEN
                                                 ; the first data to the BLT registers!
 
             ;; Draw some lines
-            move.l  bitmapaddr, a0
+            move.l  d2, a0
             lea     octants, a2
 
             move.w  #100, d0         ; d0 = x1
