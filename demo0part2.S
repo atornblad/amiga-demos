@@ -34,7 +34,29 @@ p2loop:     ;; CLEAR THE SCREEN
             movem.w (a7)+, d0-d1    ; Pop into x1, y1
             move.w  #160, d2
             move.w  #180, d3
+            movem.w d2-d3, -(a7)    ; Push x2, y2
             bsr     .drawdownsingle
+
+            move.w  #100, d0         ; d0 = x1
+            move.w  #30, d1         ; d1 = y1 (scrapped soon)
+            movem.w (a7)+, d2-d3    ; Pop back into x2, y2
+            bsr     .drawdownsingle
+
+            ;; FILL
+            ;; This is a naive fill that fills the entire width of the screen
+            ;; from y=30 to y=180
+            ;; Unnecessarily blitter heavy
+            jsr     waitblit
+            move.w  #$09f0, BLTCON0(a6)     ; USEA, USED, D=A
+            move.w  #$0012, BLTCON1(a6)     ; EFE + DESC
+            move.w  #0, BLTAMOD(a6)         ; No modulo because we fill entire width
+            move.w  #0, BLTDMOD(a6)
+            move.w  #$ffff, BLTAFWM(a6)
+            move.w  #$ffff, BLTALWM(a6)
+            lea.l   (40*179+38)(a0), a1
+            move.l  a1, BLTAPT(a6)
+            move.l  a1, BLTDPT(a6)
+            move.w  #(150<<6+20), BLTSIZE(a6)
 
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
@@ -93,7 +115,7 @@ p2loop:     ;; CLEAR THE SCREEN
 
             move.w  0(a2,d7.w), d1
 
-            ; Finally: calculate BLTSIZE (d3 + 1) << 6 | 2
+            ; Finally: calculate BLTSIZE d3 << 6 | 2
             asl.w   #6, d3
             addq.w  #2, d3          ; d3 = BLTSIZE
 

@@ -15,6 +15,7 @@ The `startup.S` file is almost 100 % identical with the wrapper code written by 
  - https://mrjester.hapisan.com/04_MC68/CycleTimes.htm
  - http://cd.textfiles.com/directory.html
  - https://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0240.html
+ - http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0122.html
  - https://www.winnicki.net/amiga/memmap/
 
  For music: check out: https://github.com/8bitbubsy/pt23f
