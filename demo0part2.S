@@ -76,10 +76,10 @@ p2loop:     ;; Double buffering
             move.w  #0, BLTDMOD(a6)
             move.w  #$ffff, BLTAFWM(a6)
             move.w  #$ffff, BLTALWM(a6)
-            lea.l   (40*179+38)(a0), a1
+            lea.l   (40*110+38)(a0), a1
             move.l  a1, BLTAPT(a6)
             move.l  a1, BLTDPT(a6)
-            move.w  #(150<<6+20), BLTSIZE(a6)
+            move.w  #(105<<6+20), BLTSIZE(a6)
 
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
@@ -93,8 +93,9 @@ p2loop:     ;; Double buffering
 
 .transformd2d3:
             ; Don't touch d0, d1, d7, a3
+            ; First a random jitter every 2 frames in one way and every 4 frames in another
             move.w  p2frame, d4
-            asr.w   #2, d4
+            asr.w   #1, d4
             ; and.w   #$00ae, d4
             mulu    #17, d4
             add.w   d3, d4
@@ -102,8 +103,8 @@ p2loop:     ;; Double buffering
             add.w   d2, d4
             mulu    #3, d4
             move.w  p2frame, d5
-            addq    #2, d5
-            asr.w   #2, d5
+            addq    #1, d5
+            asr.w   #1, d5
             ; and.w   #$006b, d5
             mulu    #3, d5
             add.w   d2, d5
@@ -111,8 +112,23 @@ p2loop:     ;; Double buffering
             eor.w   d5, d4
             and.w   #7, d4
             add.w   d4, d2
-            and.w   #7, d5
+            and.w   #3, d5
             add.w   d5, d3
+            subq.w  #3, d2
+            subq.w  #1, d3
+
+            ; Then a SINE effect based on the X coordinate
+            lea     p2sine, a4
+            move.w  d2, d4
+            lsr.w   #1, d4
+            move.w  p2frame, d5
+            lsl.w   #2, d5
+            add.w   d5, d4
+            and.w   #255, d4
+            lsl.w   #1, d4
+            move.w  0(a4,d4.w), d4
+            asr.w   #3, d4
+            add.w   d4, d3
             rts
 
 
@@ -216,77 +232,119 @@ p2loop:     ;; Double buffering
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polys     dc.w    6       ; 6 lines (outer D)
-            dc.w     10, 40
-            dc.w     10, 90
-            dc.w     40, 90
-            dc.w     50, 80
-            dc.w     50, 50
-            dc.w     40, 40
-            dc.w     10, 40
+            dc.w      5, 40
+            dc.w      5, 90
+            dc.w     35, 90
+            dc.w     45, 80
+            dc.w     45, 50
+            dc.w     35, 40
+            dc.w      5, 40
 
             dc.w    3       ; 3 lines (hole of D)
-            dc.w     23, 55
-            dc.w     23, 75
-            dc.w     37, 65
-            dc.w     23, 55
+            dc.w     18, 55
+            dc.w     18, 75
+            dc.w     32, 65
+            dc.w     18, 55
 
             dc.w    7       ; 7 lines (E)
-            dc.w     55, 40
-            dc.w     95, 49
-            dc.w     65, 58
-            dc.w     85, 65
-            dc.w     65, 72
-            dc.w     95, 81
-            dc.w     55, 90
-            dc.w     55, 40
+            dc.w     50, 40
+            dc.w     90, 49
+            dc.w     60, 58
+            dc.w     80, 65
+            dc.w     60, 72
+            dc.w     90, 81
+            dc.w     50, 90
+            dc.w     50, 40
 
             dc.w    7       ; 7 lines (F)
-            dc.w    100, 40
-            dc.w    140, 49
-            dc.w    110, 58
-            dc.w    130, 65
-            dc.w    110, 72
-            dc.w    110, 90
+            dc.w     90, 40
+            dc.w    130, 49
+            dc.w    100, 58
+            dc.w    120, 65
+            dc.w    100, 72
             dc.w    100, 90
-            dc.w    100, 40
+            dc.w     90, 90
+            dc.w     90, 40
 
             dc.w    4       ; 4 lines (I)
+            dc.w    130, 40
             dc.w    140, 40
-            dc.w    150, 40
-            dc.w    150, 90
             dc.w    140, 90
-            dc.w    140, 40
+            dc.w    130, 90
+            dc.w    130, 40
 
             dc.w    7       ; 7 lines (outer A)
-            dc.w    150, 90
-            dc.w    170, 40
-            dc.w    190, 90
+            dc.w    140, 90
+            dc.w    160, 40
             dc.w    180, 90
-            dc.w    172, 80
-            dc.w    168, 80
-            dc.w    160, 90
+            dc.w    170, 90
+            dc.w    162, 80
+            dc.w    158, 80
             dc.w    150, 90
+            dc.w    140, 90
 
             dc.w    3       ; 3 lines (hole of A)
-            dc.w    170, 55
-            dc.w    174, 65
-            dc.w    166, 65
-            dc.w    170, 55
+            dc.w    160, 55
+            dc.w    164, 65
+            dc.w    156, 65
+            dc.w    160, 55
 
             dc.w    10      ; 10 lines (N)
-            dc.w    195, 40
-            dc.w    205, 40
-            dc.w    225, 65
-            dc.w    225, 40
+            dc.w    180, 40
+            dc.w    190, 40
+            dc.w    210, 65
+            dc.w    210, 40
+            dc.w    220, 40
+            dc.w    220, 90
+            dc.w    210, 90
+            dc.w    190, 65
+            dc.w    190, 90
+            dc.w    180, 90
+            dc.w    180, 40
+
+            dc.w    11      ; 11 lines (C)
+
             dc.w    235, 40
+            dc.w    265, 40
+            dc.w    265, 50
+            dc.w    245, 50
+            dc.w    235, 65
+            dc.w    245, 80
+            dc.w    265, 80
+            dc.w    265, 90
             dc.w    235, 90
-            dc.w    225, 90
-            dc.w    205, 65
-            dc.w    205, 90
-            dc.w    195, 90
-            dc.w    195, 40
+            dc.w    225, 80
+            dc.w    225, 50
+            dc.w    235, 40
+
+            dc.w    7       ; 7 lines (E)
+            dc.w    270, 40
+            dc.w    310, 49
+            dc.w    280, 58
+            dc.w    300, 65
+            dc.w    280, 72
+            dc.w    310, 81
+            dc.w    270, 90
+            dc.w    270, 40
 
             dc.w    0       ; No more polygons
+
+p2sine:     dc.w    0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45
+            dc.w    48, 51, 54, 57, 59, 62, 65, 67, 70, 73, 75, 78, 80, 82, 85, 87
+            dc.w    89, 91, 94, 96, 98, 100, 102, 103, 105, 107, 108, 110, 112, 113, 114, 116
+            dc.w    117, 118, 119, 120, 121, 122, 123, 123, 124, 125, 125, 126, 126, 126, 126, 126
+            dc.w    127, 126, 126, 126, 126, 126, 125, 125, 124, 123, 123, 122, 121, 120, 119, 118
+            dc.w    117, 116, 114, 113, 112, 110, 108, 107, 105, 103, 102, 100, 98, 96, 94, 91
+            dc.w    89, 87, 85, 82, 80, 78, 75, 73, 70, 67, 65, 62, 59, 57, 54, 51
+            dc.w    48, 45, 42, 39, 36, 33, 30, 27, 24, 21, 18, 15, 12, 9, 6, 3
+            dc.w    0, -3, -6, -9, -12, -15, -18, -21, -24, -27, -30, -33, -36, -39, -42, -45
+            dc.w    -48, -51, -54, -57, -59, -62, -65, -67, -70, -73, -75, -78, -80, -82, -85, -87
+            dc.w    -89, -91, -94, -96, -98, -100, -102, -103, -105, -107, -108, -110, -112, -113, -114, -116
+            dc.w    -117, -118, -119, -120, -121, -122, -123, -123, -124, -125, -125, -126, -126, -126, -126, -126
+            dc.w    -127, -126, -126, -126, -126, -126, -125, -125, -124, -123, -123, -122, -121, -120, -119, -118
+            dc.w    -117, -116, -114, -113, -112, -110, -108, -107, -105, -103, -102, -100, -98, -96, -94, -91
+            dc.w    -89, -87, -85, -82, -80, -78, -75, -73, -70, -67, -65, -62, -59, -57, -54, -51
+            dc.w    -48, -45, -42, -39, -36, -33, -30, -27, -24, -21, -18, -15, -12, -9, -6, -3
 
             SECTION copper, DATA_C
 
@@ -294,7 +352,7 @@ p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compati
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
                                         ; TODO: DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
             CMOVE   COLOR0,     $0fff   ; White background
-            CMOVE   COLOR1,     $0000   ; Black foreground
+            CMOVE   COLOR1,     $0129   ; Black foreground
 
 p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane address
             CMOVE   BPL1PTL,    0

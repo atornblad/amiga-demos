@@ -6,3 +6,7 @@
 # Compiled executables
 
 demo0
+
+# Compiled C# files
+bin/
+obj/
