@@ -76,8 +76,24 @@ BPL4PTH:        equ $0ec
 BPL4PTL:        equ $0ee
 BPLCON0:        equ $100
 BPLCON1:        equ $102
+BPLCON2:        equ $104
 BPL1MOD:        equ $108
 BPL2MOD:        equ $10a
+SPR0PT:         equ $120
+SPR0PTH:        equ SPR0PT
+SPR0PTL:        equ SPR0PTH+2
+SPR1PT:         equ $124
+SPR1PTH:        equ SPR1PT
+SPR1PTL:        equ SPR1PTH+2
+SPR2PT:         equ $128
+SPR2PTH:        equ SPR2PT
+SPR2PTL:        equ SPR2PTH+2
+SPR0POS:        equ $140
+SPR0CTL:        equ $142
+SPR1POS:        equ $148
+SPR1CTL:        equ $14a
+SPR2POS:        equ $150
+SPR2CTL:        equ $152
 COLOR0:         equ $180
 COLOR1:         equ $182
 COLOR2:         equ $184
@@ -94,6 +110,14 @@ COLOR12:        equ $198
 COLOR13:        equ $19a
 COLOR14:        equ $19c
 COLOR15:        equ $19e
+COLOR16:        equ $1a0
+COLOR17:        equ $1a2
+COLOR18:        equ $1a4
+COLOR19:        equ $1a6
+COLOR20:        equ $1a8
+COLOR21:        equ $1aa
+COLOR22:        equ $1ac
+COLOR23:        equ $1ae
 FMODE:          equ $1fc
 
 CWAIT       MACRO
@@ -113,6 +137,11 @@ CEND        MACRO
 CMOVE       MACRO
             dc.w    (\1&$1ff)
             dc.w    \2
+            ENDM
+
+CMOVEH      MACRO
+            dc.w    (\1&$1ff)
+            dc.w    (\2>>16)
             ENDM
 
 ;------ Interrupts

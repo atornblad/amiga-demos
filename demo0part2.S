@@ -131,8 +131,8 @@ p2loop:     ;; Double buffering
             mulu    #7, d5
             eor.w   d5, d4
             and.w   #7, d4
-            add.w   d4, d2
             and.w   #3, d5
+            add.w   d4, d2
             add.w   d5, d3
             subq.w  #3, d2
             subq.w  #1, d3
@@ -411,6 +411,7 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPL1MOD,    0       ; Odd bitplane modulo
             CMOVE   BPL2MOD,    0       ; Even bitplane modulo
             CMOVE   BPLCON1,    $0010   ; Shift even bitplanes one pixel to the right
+            CMOVE   BPLCON2,    $0024   ; Sprites take precedent over bitplanes
 
             CWAIT   $2b, 3
             CMOVE   COLOR0,     $0000
@@ -431,3 +432,5 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   COLOR0,     $0fff
 
             CEND                        ; End of copper list
+
+
