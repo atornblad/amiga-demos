@@ -46,14 +46,11 @@ p2loop:     ;; Double buffering
             move.w  d7, BLTAFWM(a6) ; ffff
             move.w  d7, BLTALWM(a6) ; ffff
 
-            ;move.l  d2, a0                      ; Target buffer
-            move.l  d2, d3
-            add.l   #24*40, d3                  ; Start at line 24
-            move.l  d3, BLTDPT(a6)
+            move.l  d2, BLTDPT(a6)
             move.w  #$0100, BLTCON0(a6)         ; Use only D channel (destination), zero minterm
             move.w  #$0000, BLTCON1(a6)
             move.w  #0, BLTDMOD(a6)             ; No modulo
-            move.w  #(83<<6+20), BLTSIZE(a6)   ; 82 rows by 20 words cleared, starts blitter
+            move.w  #(84<<6+20), BLTSIZE(a6)    ; 84 rows by 20 words cleared, starts blitter
             ; jsr     waitblit                  ; Don't wait for blit until it's time to write
                                                 ; the first data to the BLT registers!
 
@@ -93,10 +90,10 @@ p2loop:     ;; Double buffering
             move.w  #$0012, BLTCON1(a6)     ; EFE + DESC
             move.w  #0, BLTAMOD(a6)         ; No modulo because we fill entire width
             move.w  #0, BLTDMOD(a6)
-            lea.l   (40*106+38)(a0), a1
+            lea.l   (40*83+38)(a0), a1
             move.l  a1, BLTAPT(a6)
             move.l  a1, BLTDPT(a6)
-            move.w  #(83<<6+20), BLTSIZE(a6)
+            move.w  #(84<<6+20), BLTSIZE(a6)
 
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
@@ -244,100 +241,100 @@ p2loop:     ;; Double buffering
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polys     dc.w    6       ; 6 lines (outer D)
-            dc.w      5, 40
-            dc.w      5, 90
-            dc.w     35, 90
-            dc.w     45, 80
-            dc.w     45, 50
-            dc.w     35, 40
-            dc.w      5, 40
+            dc.w      5, 40-23
+            dc.w      5, 90-23
+            dc.w     35, 90-23
+            dc.w     45, 80-23
+            dc.w     45, 50-23
+            dc.w     35, 40-23
+            dc.w      5, 40-23
 
             dc.w    3       ; 3 lines (hole of D)
-            dc.w     18, 55
-            dc.w     18, 75
-            dc.w     32, 65
-            dc.w     18, 55
+            dc.w     18, 55-23
+            dc.w     18, 75-23
+            dc.w     32, 65-23
+            dc.w     18, 55-23
 
             dc.w    7       ; 7 lines (E)
-            dc.w     50, 40
-            dc.w     90, 49
-            dc.w     60, 58
-            dc.w     80, 65
-            dc.w     60, 72
-            dc.w     90, 81
-            dc.w     50, 90
-            dc.w     50, 40
+            dc.w     50, 40-23
+            dc.w     90, 49-23
+            dc.w     60, 58-23
+            dc.w     80, 65-23
+            dc.w     60, 72-23
+            dc.w     90, 81-23
+            dc.w     50, 90-23
+            dc.w     50, 40-23
 
             dc.w    7       ; 7 lines (F)
-            dc.w     90, 40
-            dc.w    130, 49
-            dc.w    100, 58
-            dc.w    120, 65
-            dc.w    100, 72
-            dc.w    100, 90
-            dc.w     90, 90
-            dc.w     90, 40
+            dc.w     90, 40-23
+            dc.w    130, 49-23
+            dc.w    100, 58-23
+            dc.w    120, 65-23
+            dc.w    100, 72-23
+            dc.w    100, 90-23
+            dc.w     90, 90-23
+            dc.w     90, 40-23
 
             dc.w    4       ; 4 lines (I)
-            dc.w    130, 40
-            dc.w    140, 40
-            dc.w    140, 90
-            dc.w    130, 90
-            dc.w    130, 40
+            dc.w    130, 40-23
+            dc.w    140, 40-23
+            dc.w    140, 90-23
+            dc.w    130, 90-23
+            dc.w    130, 40-23
 
             dc.w    7       ; 7 lines (outer A)
-            dc.w    140, 90
-            dc.w    160, 40
-            dc.w    180, 90
-            dc.w    170, 90
-            dc.w    162, 80
-            dc.w    158, 80
-            dc.w    150, 90
-            dc.w    140, 90
+            dc.w    140, 90-23
+            dc.w    160, 40-23
+            dc.w    180, 90-23
+            dc.w    170, 90-23
+            dc.w    162, 80-23
+            dc.w    158, 80-23
+            dc.w    150, 90-23
+            dc.w    140, 90-23
 
             dc.w    3       ; 3 lines (hole of A)
-            dc.w    160, 55
-            dc.w    164, 65
-            dc.w    156, 65
-            dc.w    160, 55
+            dc.w    160, 55-23
+            dc.w    164, 65-23
+            dc.w    156, 65-23
+            dc.w    160, 55-23
 
             dc.w    10      ; 10 lines (N)
-            dc.w    180, 40
-            dc.w    190, 40
-            dc.w    210, 65
-            dc.w    210, 40
-            dc.w    220, 40
-            dc.w    220, 90
-            dc.w    210, 90
-            dc.w    190, 65
-            dc.w    190, 90
-            dc.w    180, 90
-            dc.w    180, 40
+            dc.w    180, 40-23
+            dc.w    190, 40-23
+            dc.w    210, 65-23
+            dc.w    210, 40-23
+            dc.w    220, 40-23
+            dc.w    220, 90-23
+            dc.w    210, 90-23
+            dc.w    190, 65-23
+            dc.w    190, 90-23
+            dc.w    180, 90-23
+            dc.w    180, 40-23
 
             dc.w    11      ; 11 lines (C)
 
-            dc.w    235, 40
-            dc.w    265, 40
-            dc.w    265, 50
-            dc.w    245, 50
-            dc.w    235, 65
-            dc.w    245, 80
-            dc.w    265, 80
-            dc.w    265, 90
-            dc.w    235, 90
-            dc.w    225, 80
-            dc.w    225, 50
-            dc.w    235, 40
+            dc.w    235, 40-23
+            dc.w    265, 40-23
+            dc.w    265, 50-23
+            dc.w    245, 50-23
+            dc.w    235, 65-23
+            dc.w    245, 80-23
+            dc.w    265, 80-23
+            dc.w    265, 90-23
+            dc.w    235, 90-23
+            dc.w    225, 80-23
+            dc.w    225, 50-23
+            dc.w    235, 40-23
 
             dc.w    7       ; 7 lines (E)
-            dc.w    270, 40
-            dc.w    310, 49
-            dc.w    280, 58
-            dc.w    300, 65
-            dc.w    280, 72
-            dc.w    310, 81
-            dc.w    270, 90
-            dc.w    270, 40
+            dc.w    270, 40-23
+            dc.w    310, 49-23
+            dc.w    280, 58-23
+            dc.w    300, 65-23
+            dc.w    280, 72-23
+            dc.w    310, 81-23
+            dc.w    270, 90-23
+            dc.w    270, 40-23
 
             dc.w    0       ; No more polygons
 
