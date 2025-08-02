@@ -147,7 +147,6 @@ p2loop:     ;; Double buffering
             and.w   #255, d4
             lsl.w   #1, d4
             move.w  0(a5,d4.w), d4
-            asr.w   #3, d4
             add.w   d4, d3
 
             ; Finally, we add d2polyoffset (for now, this will instead by individual by glyph)
@@ -357,22 +356,27 @@ p2polys     dc.w    6       ; 6 lines (outer D)
 
             dc.w    0       ; No more polygons
 
-p2sine:     dc.w    0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45
-            dc.w    48, 51, 54, 57, 59, 62, 65, 67, 70, 73, 75, 78, 80, 82, 85, 87
-            dc.w    89, 91, 94, 96, 98, 100, 102, 103, 105, 107, 108, 110, 112, 113, 114, 116
-            dc.w    117, 118, 119, 120, 121, 122, 123, 123, 124, 125, 125, 126, 126, 126, 126, 126
-            dc.w    127, 126, 126, 126, 126, 126, 125, 125, 124, 123, 123, 122, 121, 120, 119, 118
-            dc.w    117, 116, 114, 113, 112, 110, 108, 107, 105, 103, 102, 100, 98, 96, 94, 91
-            dc.w    89, 87, 85, 82, 80, 78, 75, 73, 70, 67, 65, 62, 59, 57, 54, 51
-            dc.w    48, 45, 42, 39, 36, 33, 30, 27, 24, 21, 18, 15, 12, 9, 6, 3
-            dc.w    0, -3, -6, -9, -12, -15, -18, -21, -24, -27, -30, -33, -36, -39, -42, -45
-            dc.w    -48, -51, -54, -57, -59, -62, -65, -67, -70, -73, -75, -78, -80, -82, -85, -87
-            dc.w    -89, -91, -94, -96, -98, -100, -102, -103, -105, -107, -108, -110, -112, -113, -114, -116
-            dc.w    -117, -118, -119, -120, -121, -122, -123, -123, -124, -125, -125, -126, -126, -126, -126, -126
-            dc.w    -127, -126, -126, -126, -126, -126, -125, -125, -124, -123, -123, -122, -121, -120, -119, -118
-            dc.w    -117, -116, -114, -113, -112, -110, -108, -107, -105, -103, -102, -100, -98, -96, -94, -91
-            dc.w    -89, -87, -85, -82, -80, -78, -75, -73, -70, -67, -65, -62, -59, -57, -54, -51
-            dc.w    -48, -45, -42, -39, -36, -33, -30, -27, -24, -21, -18, -15, -12, -9, -6, -3
+; Sine table for Amiga demo
+; Values are scaled to fit in -15 to 15 range
+; Table contains 256 entries, each entry is a signed word (dc.w)
+
+p2sine:
+            dc.w    0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5
+            dc.w    5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 10, 10
+            dc.w    10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13
+            dc.w    13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14
+            dc.w    15, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 13
+            dc.w    13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 11, 11, 11, 11, 10
+            dc.w    10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 6, 6, 6
+            dc.w    5, 5, 5, 4, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0
+            dc.w    0, 0, 0, -1, -1, -1, -2, -2, -2, -3, -3, -4, -4, -4, -5, -5
+            dc.w    -5, -6, -6, -6, -7, -7, -7, -8, -8, -8, -8, -9, -9, -9, -10, -10
+            dc.w    -10, -10, -11, -11, -11, -11, -12, -12, -12, -12, -12, -13, -13, -13, -13, -13
+            dc.w    -13, -13, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14
+            dc.w    -15, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -14, -13
+            dc.w    -13, -13, -13, -13, -13, -13, -12, -12, -12, -12, -12, -11, -11, -11, -11, -10
+            dc.w    -10, -10, -10, -9, -9, -9, -8, -8, -8, -8, -7, -7, -7, -6, -6, -6
+            dc.w    -5, -5, -5, -4, -4, -4, -3, -3, -2, -2, -2, -1, -1, -1, 0, 0
 
             SECTION copper, DATA_C
 
@@ -422,56 +426,6 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
 
             CWAIT   $2d, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
-
-            CWAIT   $84, 3
-            CMOVE   BPL1MOD,    -120
-            CMOVE   BPL2MOD,    -80
-            CMOVE   COLOR0,     $0aaa   ; White background
-            CMOVE   COLOR1,     $0555   ; Black foreground
-            CMOVE   COLOR2,     $0555   ; Black foreground
-            CMOVE   COLOR3,     $0000   ; Black foreground
-            CMOVE   COLOR4,     $0555   ; Black foreground
-            CMOVE   COLOR5,     $0000   ; Black foreground
-            CMOVE   COLOR6,     $0000   ; Black foreground
-            CMOVE   COLOR7,     $0555   ; Black foreground
-            CMOVE   COLOR8,     $0555   ; Black foreground
-            CMOVE   COLOR9,     $0000   ; Black foreground
-            CMOVE   COLOR10,    $0000   ; Black foreground
-            CMOVE   COLOR11,    $0555   ; Black foreground
-            CMOVE   COLOR12,    $0000   ; Black foreground
-            CMOVE   COLOR13,    $0555   ; Black foreground
-            CMOVE   COLOR14,    $0555   ; Black foreground
-            CMOVE   COLOR15,    $0ccc   ; White foreground
-            CWAIT   $85, 3
-            CMOVE   BPL2MOD,    -120
-            CWAIT   $88, 3
-            CMOVE   BPLCON1,    $0021
-            CWAIT   $8b, 3
-            CMOVE   BPLCON1,    $0032
-            CWAIT   $8e, 3
-            CMOVE   BPLCON1,    $0043
-            CWAIT   $91, 3
-            CMOVE   BPLCON1,    $0054
-            CWAIT   $94, 3
-            CMOVE   BPLCON1,    $0065
-            CWAIT   $97, 3
-            CMOVE   BPLCON1,    $0076
-            CWAIT   $9a, 3
-            CMOVE   BPLCON1,    $0087
-            CWAIT   $9d, 3
-            CMOVE   BPLCON1,    $0098
-            CWAIT   $a0, 3
-            CMOVE   BPLCON1,    $00a9
-            CWAIT   $a3, 3
-            CMOVE   BPLCON1,    $00ba
-            CWAIT   $a6, 3
-            CMOVE   BPLCON1,    $00cb
-            CWAIT   $a9, 3
-            CMOVE   BPLCON1,    $00dc
-            CWAIT   $ac, 3
-            CMOVE   BPLCON1,    $00ed
-            CWAIT   $b0, 3
-            CMOVE   BPLCON0,    $0200
 
             CPALWAIT
             CWAIT   $2c, 3
