@@ -6,7 +6,7 @@
 
             ; demoinit called with exec.library in a6, graphics.library in a5
 demoinit:   move.l  #40*256*2, d0       ; Alloc 2 bitplanes (double buffering one bitplane)
-            move.l  #MEMF_CHIP, d1
+            move.l  #MEMF_CLEARCHIP, d1
             jsr     AllocMem(a6)
             tst.l   d0
             beq.S   .error

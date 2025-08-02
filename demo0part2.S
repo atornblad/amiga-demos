@@ -99,7 +99,7 @@ p2loop:     ;; Double buffering
             move.w  (a4), d0
             addq.w  #1, d0
             move.w  d0, (a4)
-            cmp.w   #250, d0            ; 5 seconds
+            cmp.w   #2500, d0           ; 50 seconds
             bhi.s   .p2done
             clr.w   d0
 .p2done:    rts                         ; non-zero exit after 5 seconds
