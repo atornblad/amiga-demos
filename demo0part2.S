@@ -38,12 +38,22 @@ p2loop:     ;; Double buffering
             ;; CLEAR THE SCREEN
             ;; TODO: Keep track of how much to clean up for each buffer
             jsr     waitblit
+
+            ; These four pokes are harmless for the clear, but necessary for the line and fill
+            moveq   #-1, d7
+            move.w  #$8000, BLTADAT(a6)
+            move.w  d7, BLTBDAT(a6) ; ffff
+            move.w  d7, BLTAFWM(a6) ; ffff
+            move.w  d7, BLTALWM(a6) ; ffff
+
             ;move.l  d2, a0                      ; Target buffer
-            move.l  d2, BLTDPT(a6)
+            move.l  d2, d3
+            add.l   #24*40, d3                  ; Start at line 24
+            move.l  d3, BLTDPT(a6)
             move.w  #$0100, BLTCON0(a6)         ; Use only D channel (destination), zero minterm
             move.w  #$0000, BLTCON1(a6)
             move.w  #0, BLTDMOD(a6)             ; No modulo
-            move.w  #(256<<6+20), BLTSIZE(a6)   ; 256 rows by 20 words cleared, starts blitter
+            move.w  #(83<<6+20), BLTSIZE(a6)   ; 82 rows by 20 words cleared, starts blitter
             ; jsr     waitblit                  ; Don't wait for blit until it's time to write
                                                 ; the first data to the BLT registers!
 
@@ -76,19 +86,17 @@ p2loop:     ;; Double buffering
 
             ;; FILL
             ;; This is a naive fill that fills the entire width of the screen
-            ;; from y=30 to y=180
-            ;; Unnecessarily blitter heavy
+            ;; from y=24 to y=106 (including)
+            ;; For this scene, which fills the entire width, this works fine!
             jsr     waitblit
             move.w  #$09f0, BLTCON0(a6)     ; USEA, USED, D=A
             move.w  #$0012, BLTCON1(a6)     ; EFE + DESC
             move.w  #0, BLTAMOD(a6)         ; No modulo because we fill entire width
             move.w  #0, BLTDMOD(a6)
-            move.w  #$ffff, BLTAFWM(a6)
-            move.w  #$ffff, BLTALWM(a6)
-            lea.l   (40*110+38)(a0), a1
+            lea.l   (40*106+38)(a0), a1
             move.l  a1, BLTAPT(a6)
             move.l  a1, BLTDPT(a6)
-            move.w  #(105<<6+20), BLTSIZE(a6)
+            move.w  #(83<<6+20), BLTSIZE(a6)
 
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
@@ -205,11 +213,6 @@ p2loop:     ;; Double buffering
             addq.w  #2, d3          ; d3 = BLTSIZE
 
             jsr     waitblit        ; Time to start poking BLT regs, wait for blitter first
-            moveq   #-1, d7
-            move.w  #$8000, BLTADAT(a6)
-            move.w  d7, BLTBDAT(a6) ; ffff
-            move.w  d7, BLTAFWM(a6) ; ffff
-            move.w  d7, BLTALWM(a6) ; ffff
             move.w  d5, BLTBMOD(a6) ; 4 * dmin
             sub.w   d6, d5
             ; If 4dy-2dmax < 0 (current d5), set SIGN flag in BLTCON1(d1)
