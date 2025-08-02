@@ -7,6 +7,9 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
 
             move.l  #p2copper, COP1LC(a6)
             clr.w   COPJMP1(a6)
+            
+            lea     p2sine, a5
+
             rts
 
 p2loop:     ;; Double buffering
@@ -124,7 +127,7 @@ p2loop:     ;; Double buffering
             subq.w  #1, d3
 
             ; Then a SINE effect based on the X coordinate
-            lea     p2sine, a4
+            ; a5 must point to p2sine
             move.w  d2, d4
             lsr.w   #1, d4
             move.w  p2frame, d5
@@ -132,7 +135,7 @@ p2loop:     ;; Double buffering
             add.w   d5, d4
             and.w   #255, d4
             lsl.w   #1, d4
-            move.w  0(a4,d4.w), d4
+            move.w  0(a5,d4.w), d4
             asr.w   #3, d4
             add.w   d4, d3
             rts
@@ -391,17 +394,183 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPLCON1,    $0010   ; Shift even bitplanes one pixel to the right
 
             CWAIT   $2b, 3
-
             CMOVE   COLOR0,     $0000
 
             CWAIT   $2c, 3
-
             CMOVE   BPLCON0,    $2200   ; Turn on two bitplanes
             CMOVE   COLOR0,     $0ccc
 
             CWAIT   $2d, 3
-
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
+
+p2cprsine:  CWAIT   $44, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $45, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $46, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $47, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $48, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $49, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4a, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4b, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4c, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4d, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4e, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $4f, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $50, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $51, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $52, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $53, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $54, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $55, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $56, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $57, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $58, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $59, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5a, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5b, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5c, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5d, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5e, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $5f, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $60, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $61, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $62, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $63, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $64, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $65, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $66, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $67, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $68, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $69, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6a, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6b, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6c, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6d, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6e, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $6f, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $70, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $71, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $72, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $73, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $74, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $75, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $76, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $77, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $78, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $79, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7a, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7b, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7c, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7d, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7e, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $7f, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $80, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $81, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $82, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $83, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $84, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $85, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $86, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $87, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $88, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $89, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8a, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8b, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8c, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8d, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8e, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $8f, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $90, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $91, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $92, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $93, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $94, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $95, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $96, 3
+            CMOVE   BPLCON1,    $0010
+            CWAIT   $97, 3
+            CMOVE   BPLCON1,    $0010
 
             CPALWAIT
             CWAIT   $2c, 3
