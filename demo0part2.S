@@ -95,6 +95,12 @@ p2loop:     ;; Double buffering
             move.l  a1, BLTDPT(a6)
             move.w  #(84<<6+20), BLTSIZE(a6)
 
+            sub.w   #3, p2polyoffset
+            cmp.w   #-320, p2polyoffset
+            bgt.s   .polyoffsetdone
+            add.w   #640, p2polyoffset
+.polyoffsetdone:
+
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
             addq.w  #1, d0
@@ -143,6 +149,17 @@ p2loop:     ;; Double buffering
             move.w  0(a5,d4.w), d4
             asr.w   #3, d4
             add.w   d4, d3
+
+            ; Finally, we add d2polyoffset (for now, this will instead by individual by glyph)
+            add.w   p2polyoffset, d2
+            bmi.s   .transformnegative
+            cmp.w   #319, d2
+            bmi.s   .transformdone
+            move.w  #318, d2
+.transformdone:
+            rts
+.transformnegative:
+            clr.w   d2
             rts
 
 
@@ -240,6 +257,8 @@ p2loop:     ;; Double buffering
 
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
+p2polyoffset:
+            dc.w    320
 p2polys     dc.w    6       ; 6 lines (outer D)
             dc.w      5, 40-23
             dc.w      5, 90-23
@@ -361,20 +380,20 @@ p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compati
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
                                         ; TODO: DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
             CMOVE   COLOR0,     $0fff   ; White background
-            CMOVE   COLOR1,     $0000   ; Black foreground
-            CMOVE   COLOR2,     $0000   ; Black foreground
+            CMOVE   COLOR1,     $0777   ; Black foreground
+            CMOVE   COLOR2,     $0777   ; Black foreground
             CMOVE   COLOR3,     $0000   ; Black foreground
-            CMOVE   COLOR4,     $0000   ; Black foreground
+            CMOVE   COLOR4,     $0777   ; Black foreground
             CMOVE   COLOR5,     $0000   ; Black foreground
             CMOVE   COLOR6,     $0000   ; Black foreground
-            CMOVE   COLOR7,     $0000   ; Black foreground
-            CMOVE   COLOR8,     $0000   ; Black foreground
+            CMOVE   COLOR7,     $0777   ; Black foreground
+            CMOVE   COLOR8,     $0777   ; Black foreground
             CMOVE   COLOR9,     $0000   ; Black foreground
             CMOVE   COLOR10,    $0000   ; Black foreground
-            CMOVE   COLOR11,    $0000   ; Black foreground
+            CMOVE   COLOR11,    $0777   ; Black foreground
             CMOVE   COLOR12,    $0000   ; Black foreground
-            CMOVE   COLOR13,    $0000   ; Black foreground
-            CMOVE   COLOR14,    $0000   ; Black foreground
+            CMOVE   COLOR13,    $0777   ; Black foreground
+            CMOVE   COLOR14,    $0777   ; Black foreground
             CMOVE   COLOR15,    $0fff   ; White foreground
 
 p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
