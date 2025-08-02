@@ -68,11 +68,32 @@ AUD3LC:         equ $0d0
 AUD3VOL:        equ $0d8
 BPL1PTH:        equ $0e0
 BPL1PTL:        equ $0e2
+BPL2PTH:        equ $0e4
+BPL2PTL:        equ $0e6
+BPL3PTH:        equ $0e8
+BPL3PTL:        equ $0ea
+BPL4PTH:        equ $0ec
+BPL4PTL:        equ $0ee
 BPLCON0:        equ $100
+BPLCON1:        equ $102
 BPL1MOD:        equ $108
 BPL2MOD:        equ $10a
 COLOR0:         equ $180
 COLOR1:         equ $182
+COLOR2:         equ $184
+COLOR3:         equ $186
+COLOR4:         equ $188
+COLOR5:         equ $18a
+COLOR6:         equ $18c
+COLOR7:         equ $18e
+COLOR8:         equ $190
+COLOR9:         equ $192
+COLOR10:        equ $194
+COLOR11:        equ $196
+COLOR12:        equ $198
+COLOR13:        equ $19a
+COLOR14:        equ $19c
+COLOR15:        equ $19e
 FMODE:          equ $1fc
 
 CWAIT       MACRO

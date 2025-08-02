@@ -20,8 +20,14 @@ p2loop:     ;; Double buffering
             mulu.w  #40*256, d1
             add.l   bitmapaddr, d1
             move.w  d1, (p2cprbmps+6)
+            move.w  d1, (p2cprbmps+14)
+            move.w  d1, (p2cprbmps+22)
+            move.w  d1, (p2cprbmps+30)
             swap    d1
             move.w  d1, (p2cprbmps+2)
+            move.w  d1, (p2cprbmps+10)
+            move.w  d1, (p2cprbmps+18)
+            move.w  d1, (p2cprbmps+26)
 
             mulu.w  #40*256, d2
             add.l   bitmapaddr, d2
@@ -352,25 +358,57 @@ p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compati
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
                                         ; TODO: DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
             CMOVE   COLOR0,     $0fff   ; White background
-            CMOVE   COLOR1,     $0129   ; Black foreground
+            CMOVE   COLOR1,     $0000   ; Black foreground
+            CMOVE   COLOR2,     $0000   ; Black foreground
+            CMOVE   COLOR3,     $0000   ; Black foreground
+            CMOVE   COLOR4,     $0000   ; Black foreground
+            CMOVE   COLOR5,     $0000   ; Black foreground
+            CMOVE   COLOR6,     $0000   ; Black foreground
+            CMOVE   COLOR7,     $0000   ; Black foreground
+            CMOVE   COLOR8,     $0000   ; Black foreground
+            CMOVE   COLOR9,     $0000   ; Black foreground
+            CMOVE   COLOR10,    $0000   ; Black foreground
+            CMOVE   COLOR11,    $0000   ; Black foreground
+            CMOVE   COLOR12,    $0000   ; Black foreground
+            CMOVE   COLOR13,    $0000   ; Black foreground
+            CMOVE   COLOR14,    $0000   ; Black foreground
+            CMOVE   COLOR15,    $0fff   ; White foreground
 
-p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane address
+p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPL1PTL,    0
+            CMOVE   BPL2PTH,    0
+            CMOVE   BPL2PTL,    0
+            CMOVE   BPL3PTH,    0
+            CMOVE   BPL3PTL,    0
+            CMOVE   BPL4PTH,    0
+            CMOVE   BPL4PTL,    0
 
             CMOVE   DDFSTRT,    $0038   ; Left edge of display data fetch
             CMOVE   DDFSTOP,    $00d0   ; Right edge of display data fetch (320 pixels wide)
 
             CMOVE   BPL1MOD,    0       ; Odd bitplane modulo
             CMOVE   BPL2MOD,    0       ; Even bitplane modulo
+            CMOVE   BPLCON1,    $0010   ; Shift even bitplanes one pixel to the right
+
+            CWAIT   $2b, 3
+
+            CMOVE   COLOR0,     $0000
 
             CWAIT   $2c, 3
 
-            CMOVE   BPLCON0,    $1200   ; Turn on one bitplane
-            CMOVE   COLOR0,     $0999
+            CMOVE   BPLCON0,    $2200   ; Turn on two bitplanes
+            CMOVE   COLOR0,     $0ccc
+
+            CWAIT   $2d, 3
+
+            CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
 
             CPALWAIT
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes (0 bitplanes on)
+            CMOVE   COLOR0,     $0000
+
+            CWAIT   $2d, 3
             CMOVE   COLOR0,     $0fff
 
             CEND                        ; End of copper list

@@ -1,7 +1,7 @@
             INCLUDE     "startup.S"
             INCLUDE     "demo0init.S"
             INCLUDE     "demo0exit.S"
-            INCLUDE     "demo0part1.S"
+            ;INCLUDE     "demo0part1.S"
             INCLUDE     "demo0part2.S"
 
 ******************************************************************
