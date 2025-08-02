@@ -423,6 +423,56 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CWAIT   $2d, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
 
+            CWAIT   $84, 3
+            CMOVE   BPL1MOD,    -120
+            CMOVE   BPL2MOD,    -80
+            CMOVE   COLOR0,     $0aaa   ; White background
+            CMOVE   COLOR1,     $0555   ; Black foreground
+            CMOVE   COLOR2,     $0555   ; Black foreground
+            CMOVE   COLOR3,     $0000   ; Black foreground
+            CMOVE   COLOR4,     $0555   ; Black foreground
+            CMOVE   COLOR5,     $0000   ; Black foreground
+            CMOVE   COLOR6,     $0000   ; Black foreground
+            CMOVE   COLOR7,     $0555   ; Black foreground
+            CMOVE   COLOR8,     $0555   ; Black foreground
+            CMOVE   COLOR9,     $0000   ; Black foreground
+            CMOVE   COLOR10,    $0000   ; Black foreground
+            CMOVE   COLOR11,    $0555   ; Black foreground
+            CMOVE   COLOR12,    $0000   ; Black foreground
+            CMOVE   COLOR13,    $0555   ; Black foreground
+            CMOVE   COLOR14,    $0555   ; Black foreground
+            CMOVE   COLOR15,    $0ccc   ; White foreground
+            CWAIT   $85, 3
+            CMOVE   BPL2MOD,    -120
+            CWAIT   $88, 3
+            CMOVE   BPLCON1,    $0021
+            CWAIT   $8b, 3
+            CMOVE   BPLCON1,    $0032
+            CWAIT   $8e, 3
+            CMOVE   BPLCON1,    $0043
+            CWAIT   $91, 3
+            CMOVE   BPLCON1,    $0054
+            CWAIT   $94, 3
+            CMOVE   BPLCON1,    $0065
+            CWAIT   $97, 3
+            CMOVE   BPLCON1,    $0076
+            CWAIT   $9a, 3
+            CMOVE   BPLCON1,    $0087
+            CWAIT   $9d, 3
+            CMOVE   BPLCON1,    $0098
+            CWAIT   $a0, 3
+            CMOVE   BPLCON1,    $00a9
+            CWAIT   $a3, 3
+            CMOVE   BPLCON1,    $00ba
+            CWAIT   $a6, 3
+            CMOVE   BPLCON1,    $00cb
+            CWAIT   $a9, 3
+            CMOVE   BPLCON1,    $00dc
+            CWAIT   $ac, 3
+            CMOVE   BPLCON1,    $00ed
+            CWAIT   $b0, 3
+            CMOVE   BPLCON0,    $0200
+
             CPALWAIT
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes (0 bitplanes on)
