@@ -15,7 +15,7 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2fontnull          ; +
             dc.l    p2fontnull          ; ,
             dc.l    p2fontnull          ; -
-            dc.l    p2fontnull          ; .
+            dc.l    p2font_dot          ; .
             dc.l    p2fontnull          ; /
             dc.l    p2fontnull          ; 0
             dc.l    p2fontnull          ; 1
@@ -35,7 +35,7 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2fontnull          ; ?
             dc.l    p2fontnull          ; @
             dc.l    p2font_a            ; A
-            dc.l    p2fontnull          ; B
+            dc.l    p2font_b            ; B
             dc.l    p2font_c            ; C
             dc.l    p2font_d            ; D
             dc.l    p2font_e            ; E
@@ -48,17 +48,17 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2fontnull          ; L
             dc.l    p2fontnull          ; M
             dc.l    p2font_n            ; N
-            dc.l    p2fontnull          ; O
+            dc.l    p2font_o            ; O
             dc.l    p2fontnull          ; P
             dc.l    p2fontnull          ; Q
-            dc.l    p2fontnull          ; R
+            dc.l    p2font_r            ; R
             dc.l    p2fontnull          ; S
             dc.l    p2fontnull          ; T
             dc.l    p2fontnull          ; U
             dc.l    p2fontnull          ; V
             dc.l    p2fontnull          ; W
             dc.l    p2fontnull          ; X
-            dc.l    p2fontnull          ; Y
+            dc.l    p2font_y            ; Y
             dc.l    p2fontnull          ; Z
             dc.l    p2fontnull          ; [
             dc.l    p2fontnull          ; \
@@ -67,6 +67,15 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2fontnull          ; _
 
 p2fontnull: dc.w    20, 0       ; 20 px spacing, no lines
+
+p2font_dot: dc.w    20
+            dc.w    4
+            dc.w     5, 40
+            dc.w    15, 40
+            dc.w    15, 50
+            dc.w     5, 50
+            dc.w     5, 40
+            dc.w    0
 
 p2font_a:   dc.w    45          ; Spacing
             dc.w    7           ; Number of lines
@@ -84,6 +93,26 @@ p2font_a:   dc.w    45          ; Spacing
             dc.w    16, 25
             dc.w    20, 15
             dc.w    0           ; No more polygons
+
+p2font_b:   dc.W    45
+            dc.w    5
+            dc.w     0,  0
+            dc.w    40,  10
+            dc.W    30,  25
+            dc.w    40,  40
+            dc.w     0,  50
+            dc.w     0,   0
+            dc.w    3
+            dc.w    15, 10
+            dc.w    25, 15
+            dc.w    15, 20
+            dc.w    15, 10
+            dc.w    3
+            dc.w    15, 30
+            dc.w    25, 35
+            dc.w    15, 40
+            dc.w    15, 30
+            dc.w    0
 
 p2font_c:   dc.w    45
             dc.w    11
@@ -162,6 +191,55 @@ p2font_n:   dc.w    45
             dc.w    10, 25
             dc.w    10, 50
             dc.w     0, 50
+            dc.w     0,  0
+            dc.w    0
+
+p2font_o:   dc.w    45
+            dc.w    6
+            dc.w    10,  0
+            dc.w    30,  0
+            dc.w    40, 25
+            dc.w    30, 50
+            dc.w    10, 50
+            dc.w     0, 25
+            dc.w    10,  0
+            dc.w    3
+            dc.w    20, 20
+            dc.w    25, 30
+            dc.w    15, 30
+            dc.w    20, 20
+            dc.w    0
+
+p2font_r:   dc.w    45
+            dc.w    9
+            dc.w     0,  0
+            dc.w    30,  5
+            dc.w    40, 15
+            dc.w    25, 25
+            dc.w    40, 50
+            dc.w    30, 50
+            dc.w    10, 30
+            dc.w    10, 50
+            dc.w     0, 50
+            dc.w     0, 0
+            dc.w    3
+            dc.w    17, 12
+            dc.w    23, 15
+            dc.w    17, 18
+            dc.w    17, 12
+            dc.w    0
+
+p2font_y:   dc.w    45
+            dc.w    9
+            dc.w     0,  0
+            dc.w    10,  0
+            dc.w    20, 20
+            dc.w    30,  0
+            dc.w    40,  0
+            dc.w    25, 30
+            dc.w    25, 50
+            dc.w    15, 50
+            dc.w    15, 30
             dc.w     0,  0
             dc.w    0
 

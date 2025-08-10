@@ -61,9 +61,11 @@ p2loop:     ;; Double buffering
 
             ;; TODO: Indirect pointer to p2text, increment when each char pops out off the left edge
             move.l  p2textptr, a4
+            tst.b   (a4)            ; No text left?
+            beq     .p2exit         ; Skip to next part
             move.w  p2polyoffset, d6 ; X coordinate
 
-.textloop:  cmp.w   #320, d6      ; Is next glyph off screen?
+.textloop:  cmp.w   #324, d6      ; Is next glyph off screen?
             bgt.s   .textend
             clr.l   d7              ; Get one char
             move.b  (a4)+, d7
@@ -75,6 +77,7 @@ p2loop:     ;; Double buffering
             move.l  d7, a3
             move.l  (a3), a3        ; Point to glyph
 
+            ;; TODO: Use kerning table (64x64 bytes)
             move.w  (a3)+, d0       ; Get glyph width
             move.W  d0, d1
             add.w   d6, d1          ; d0 is not right edge of glyph
@@ -123,7 +126,7 @@ p2loop:     ;; Double buffering
             move.l  a1, BLTDPT(a6)
             move.w  #(85<<6+20), BLTSIZE(a6)
 
-            sub.w   #1, p2polyoffset
+            sub.w   #3, p2polyoffset
             cmp.w   #-800, p2polyoffset
             bgt.s   .polyoffsetdone
             add.w   #1120, p2polyoffset
@@ -137,7 +140,8 @@ p2loop:     ;; Double buffering
             bhi.s   .p2done
             clr.w   d0
 .p2done:    rts                         ; non-zero exit after 5 seconds
-
+.p2exit:    moveq   #1, d0
+            rts
 
 .transformd2d3:
             ; Don't touch d0, d1, d6, d7, a3
@@ -290,8 +294,8 @@ p2textptr:  ds.l    1
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
-            dc.w    160
-p2text:     dc.b    "DEFIANCE FINANCE DEAF FADE ACE", 0
+            dc.w    325
+p2text:     dc.b    "CODE BY ORION OF DEFIANCE...", 0
             CNOP    0, 2
 
             INCLUDE "demo0part2font.S"
