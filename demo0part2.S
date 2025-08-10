@@ -9,6 +9,7 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             clr.w   COPJMP1(a6)
             
             lea     p2sine, a5
+            move.l  #p2text, p2textptr
 
             rts
 
@@ -50,7 +51,7 @@ p2loop:     ;; Double buffering
             move.w  #$0100, BLTCON0(a6)         ; Use only D channel (destination), zero minterm
             move.w  #$0000, BLTCON1(a6)
             move.w  #0, BLTDMOD(a6)             ; No modulo
-            move.w  #(84<<6+20), BLTSIZE(a6)    ; 84 rows by 20 words cleared, starts blitter
+            move.w  #(85<<6+20), BLTSIZE(a6)    ; 84 rows by 20 words cleared, starts blitter
             ; jsr     waitblit                  ; Don't wait for blit until it's time to write
                                                 ; the first data to the BLT registers!
 
@@ -58,7 +59,33 @@ p2loop:     ;; Double buffering
             move.l  d2, a0
             lea     octants, a2
 
-            lea     p2polys, a3
+            ;; TODO: Indirect pointer to p2text, increment when each char pops out off the left edge
+            move.l  p2textptr, a4
+            move.w  p2polyoffset, d6 ; X coordinate
+
+.textloop:  cmp.w   #320, d6      ; Is next glyph off screen?
+            bgt.s   .textend
+            clr.l   d7              ; Get one char
+            move.b  (a4)+, d7
+            tst.w   d7              ; End of text?
+            beq.s   .textend
+            sub.w   #32, d7         ; No glyphs before SPACE
+            asl.w   #2, d7          ; Multiply by size of pointer
+            add.l   #p2font, d7     ; Point to glyph pointer
+            move.l  d7, a3
+            move.l  (a3), a3        ; Point to glyph
+
+            move.w  (a3)+, d0       ; Get glyph width
+            move.W  d0, d1
+            add.w   d6, d1          ; d0 is not right edge of glyph
+            tst.w   d1              ; Is glyph completely off screen?
+            bpl.s   .notoffscr
+            move.l  a4, p2textptr   ; Move text start ptr forward
+            add.w   d0, d6          ; Move left edge forward
+            move.w  d6, p2polyoffset ; Store new poly offset
+            bra.s   .textloop
+.notoffscr: move.w  d0, -(sp)       ; Push glyph width
+
 .polysloop: move.w  (a3)+, d7       ; Number of lines
             tst.w   d7
             beq.s   .polysend
@@ -72,15 +99,16 @@ p2loop:     ;; Double buffering
 .onepoly:   move.w  (a3)+, d2
             move.w  (a3)+, d3
             bsr     .transformd2d3
-            movem.l d2-d3/d7/a3, -(sp)      ; Push x2, y2, loop, pointer
+            movem.l d2-d3/d6-d7/a3, -(sp)      ; Push x2, y2, x coord, loop, pointer
             bsr     .drawsingle
-            movem.l (sp)+, d0-d1/d7/a3      ; Pop x1, y1, loop, pointer
+            movem.l (sp)+, d0-d1/d6-d7/a3      ; Pop x1, y1, x coord, loop, pointer
             subq.w  #1, d7
             bne.s   .onepoly
             bra.s   .polysloop
 
-.polysend:
-
+.polysend:  add.W   (sp)+, d6       ; Add glyph width to x offset
+            bra.s   .textloop
+.textend:
             ;; FILL
             ;; This is a naive fill that fills the entire width of the screen
             ;; from y=24 to y=106 (including)
@@ -90,15 +118,15 @@ p2loop:     ;; Double buffering
             move.w  #$0012, BLTCON1(a6)     ; EFE + DESC
             move.w  #0, BLTAMOD(a6)         ; No modulo because we fill entire width
             move.w  #0, BLTDMOD(a6)
-            lea.l   (40*83+38)(a0), a1
+            lea.l   (40*84+38)(a0), a1
             move.l  a1, BLTAPT(a6)
             move.l  a1, BLTDPT(a6)
-            move.w  #(84<<6+20), BLTSIZE(a6)
+            move.w  #(85<<6+20), BLTSIZE(a6)
 
-            sub.w   #3, p2polyoffset
-            cmp.w   #-320, p2polyoffset
+            sub.w   #1, p2polyoffset
+            cmp.w   #-800, p2polyoffset
             bgt.s   .polyoffsetdone
-            add.w   #640, p2polyoffset
+            add.w   #1120, p2polyoffset
 .polyoffsetdone:
 
 .countdown: lea     p2frame, a4
@@ -112,30 +140,11 @@ p2loop:     ;; Double buffering
 
 
 .transformd2d3:
-            ; Don't touch d0, d1, d7, a3
-            ; First a random jitter every 2 frames in one way and every 4 frames in another
-            move.w  p2frame, d4
-            asr.w   #1, d4
-            ; and.w   #$00ae, d4
-            mulu    #17, d4
-            add.w   d3, d4
-            mulu    #5, d4
-            add.w   d2, d4
-            mulu    #3, d4
-            move.w  p2frame, d5
-            addq    #1, d5
-            asr.w   #1, d5
-            ; and.w   #$006b, d5
-            mulu    #3, d5
-            add.w   d2, d5
-            mulu    #7, d5
-            eor.w   d5, d4
-            and.w   #7, d4
-            and.w   #3, d5
-            add.w   d4, d2
-            add.w   d5, d3
-            subq.w  #3, d2
-            subq.w  #1, d3
+            ; Don't touch d0, d1, d6, d7, a3
+            ; First add the d6 x offset
+            add.w   d6, d2
+            ; Add 18 px to y offset
+            add.w   #18, d3
 
             ; Then a SINE effect based on the X coordinate
             ; a5 must point to p2sine
@@ -149,8 +158,30 @@ p2loop:     ;; Double buffering
             move.w  0(a5,d4.w), d4
             add.w   d4, d3
 
+            ; Then a random jitter every 2 frames in one way and every 4 frames in another
+            move.w  p2frame, d4
+            asr.w   #2, d4
+            mulu    #17, d4
+            add.w   d3, d4
+            mulu    #5, d4
+            add.w   d2, d4
+            mulu    #3, d4
+            move.w  p2frame, d5
+            addq    #1, d5
+            asr.w   #1, d5
+            mulu    #3, d5
+            add.w   d2, d5
+            mulu    #7, d5
+            eor.w   d5, d4
+            and.w   #7, d4
+            and.w   #3, d5
+            add.w   d4, d2
+            add.w   d5, d3
+            subq.w  #3, d2
+            subq.w  #1, d3
+
             ; Finally, we add d2polyoffset (for now, this will instead by individual by glyph)
-            add.w   p2polyoffset, d2
+            tst.w   d2
             bmi.s   .transformnegative
             cmp.w   #319, d2
             bmi.s   .transformdone
@@ -250,111 +281,20 @@ p2loop:     ;; Double buffering
 
             rts
 
+            SECTION vars, BSS
 
+p2textptr:  ds.l    1
 
             SECTION vars_initialized, DATA
 
 p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
-            dc.w    320
-p2polys     dc.w    6       ; 6 lines (outer D)
-            dc.w      5, 40-23
-            dc.w      5, 90-23
-            dc.w     35, 90-23
-            dc.w     45, 80-23
-            dc.w     45, 50-23
-            dc.w     35, 40-23
-            dc.w      5, 40-23
+            dc.w    160
+p2text:     dc.b    "DEFIANCE FINANCE DEAF FADE ACE", 0
+            CNOP    0, 2
 
-            dc.w    3       ; 3 lines (hole of D)
-            dc.w     18, 55-23
-            dc.w     18, 75-23
-            dc.w     32, 65-23
-            dc.w     18, 55-23
-
-            dc.w    7       ; 7 lines (E)
-            dc.w     50, 40-23
-            dc.w     90, 49-23
-            dc.w     60, 58-23
-            dc.w     80, 65-23
-            dc.w     60, 72-23
-            dc.w     90, 81-23
-            dc.w     50, 90-23
-            dc.w     50, 40-23
-
-            dc.w    7       ; 7 lines (F)
-            dc.w     90, 40-23
-            dc.w    130, 49-23
-            dc.w    100, 58-23
-            dc.w    120, 65-23
-            dc.w    100, 72-23
-            dc.w    100, 90-23
-            dc.w     90, 90-23
-            dc.w     90, 40-23
-
-            dc.w    4       ; 4 lines (I)
-            dc.w    130, 40-23
-            dc.w    140, 40-23
-            dc.w    140, 90-23
-            dc.w    130, 90-23
-            dc.w    130, 40-23
-
-            dc.w    7       ; 7 lines (outer A)
-            dc.w    140, 90-23
-            dc.w    160, 40-23
-            dc.w    180, 90-23
-            dc.w    170, 90-23
-            dc.w    162, 80-23
-            dc.w    158, 80-23
-            dc.w    150, 90-23
-            dc.w    140, 90-23
-
-            dc.w    3       ; 3 lines (hole of A)
-            dc.w    160, 55-23
-            dc.w    164, 65-23
-            dc.w    156, 65-23
-            dc.w    160, 55-23
-
-            dc.w    10      ; 10 lines (N)
-            dc.w    180, 40-23
-            dc.w    190, 40-23
-            dc.w    210, 65-23
-            dc.w    210, 40-23
-            dc.w    220, 40-23
-            dc.w    220, 90-23
-            dc.w    210, 90-23
-            dc.w    190, 65-23
-            dc.w    190, 90-23
-            dc.w    180, 90-23
-            dc.w    180, 40-23
-
-            dc.w    11      ; 11 lines (C)
-
-            dc.w    235, 40-23
-            dc.w    265, 40-23
-            dc.w    265, 50-23
-            dc.w    245, 50-23
-            dc.w    235, 65-23
-            dc.w    245, 80-23
-            dc.w    265, 80-23
-            dc.w    265, 90-23
-            dc.w    235, 90-23
-            dc.w    225, 80-23
-            dc.w    225, 50-23
-            dc.w    235, 40-23
-
-            dc.w    7       ; 7 lines (E)
-            dc.w    270, 40-23
-            dc.w    310, 49-23
-            dc.w    280, 58-23
-            dc.w    300, 65-23
-            dc.w    280, 72-23
-            dc.w    310, 81-23
-            dc.w    270, 90-23
-            dc.w    270, 40-23
-
-            dc.w    0       ; No more polygons
+            INCLUDE "demo0part2font.S"
 
 ; Sine table for Amiga demo
 ; Values are scaled to fit in -15 to 15 range
