@@ -53,7 +53,7 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2fontnull          ; Q
             dc.l    p2font_r            ; R
             dc.l    p2fontnull          ; S
-            dc.l    p2fontnull          ; T
+            dc.l    p2font_t            ; T
             dc.l    p2fontnull          ; U
             dc.l    p2fontnull          ; V
             dc.l    p2fontnull          ; W
@@ -61,12 +61,14 @@ p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2font_y            ; Y
             dc.l    p2fontnull          ; Z
             dc.l    p2fontnull          ; [
-            dc.l    p2fontnull          ; \
+            dc.l    p2font_kern         ; \
             dc.l    p2fontnull          ; ]
             dc.l    p2fontnull          ; ^
             dc.l    p2fontnull          ; _
 
 p2fontnull: dc.w    20, 0       ; 20 px spacing, no lines
+
+p2font_kern:dc.W    -5, 0
 
 p2font_dot: dc.w    20
             dc.w    4
@@ -170,11 +172,11 @@ p2font_f:   dc.w    45
             dc.w     0,  0
             dc.w    0
 
-p2font_i:   dc.w    15
+p2font_i:   dc.w    20
             dc.w    4
             dc.w     0,  0
-            dc.w    10,  0
-            dc.w    10, 50
+            dc.w    12,  0
+            dc.w    12, 50
             dc.w     0, 50
             dc.w     0,  0
             dc.w    0
@@ -204,10 +206,10 @@ p2font_o:   dc.w    45
             dc.w     0, 25
             dc.w    10,  0
             dc.w    3
-            dc.w    20, 20
-            dc.w    25, 30
-            dc.w    15, 30
-            dc.w    20, 20
+            dc.w    20, 15
+            dc.w    26, 35
+            dc.w    14, 35
+            dc.w    20, 15
             dc.w    0
 
 p2font_r:   dc.w    45
@@ -228,6 +230,19 @@ p2font_r:   dc.w    45
             dc.w    17, 18
             dc.w    17, 12
             dc.w    0
+
+p2font_t:   dc.w    45
+            dc.w    8
+            dc.w     0,  0
+            dc.w    40,  0
+            dc.w    40, 10
+            dc.w    25, 10
+            dc.w    25, 50
+            dc.w    15, 50
+            dc.w    15, 10
+            dc.w     0, 10
+            dc.w     0,  0
+            dc.w    0;
 
 p2font_y:   dc.w    45
             dc.w    9

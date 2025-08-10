@@ -295,7 +295,8 @@ p2frame     dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
             dc.w    325
-p2text:     dc.b    "CODE BY ORION OF DEFIANCE...", 0
+            ;;      Backslash is a kerning helper
+p2text:     dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
             CNOP    0, 2
 
             INCLUDE "demo0part2font.S"
