@@ -333,8 +333,9 @@ p2speed:    dc.w    3
             ;;      Backslash is a kerning helper
 p2text:     ;dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
             dc.b    "AFTER 30 YEARS, "
-            dc.b    "IT'S F\INALLY "
-            dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE B\Y ORION OF DEF\IANCE!"
+            dc.b    "IT'S F\INALL\Y "
+            dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE "
+            dc.b    "B\Y ORION OF DEF\IANCE!"
             dc.b    0
             CNOP    0, 2
 
