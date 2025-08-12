@@ -1,11 +1,11 @@
 # Amiga file icons
 
 .info
-*.info
+# *.info
 
 # Compiled executables
 
-demo0
+# demo0
 
 # Compiled C# files
 bin/
