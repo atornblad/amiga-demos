@@ -106,10 +106,10 @@ p2font_com: dc.w    20
 p2font_min: dc.w    35
             dc.w    6
             dc.w     0, 20
-            dc.w    15, 20
+            dc.w    12, 20
             dc.w    30, 20
             dc.w    30, 30
-            dc.w    15, 30
+            dc.w    18, 30
             dc.w     0, 30
             dc.w     0, 20
             dc.w    0
@@ -351,10 +351,10 @@ p2font_r:   dc.w    45
             dc.w     0, 50
             dc.w     0, 0
             dc.w    3
-            dc.w    17, 12
-            dc.w    23, 15
-            dc.w    17, 18
-            dc.w    17, 12
+            dc.w    12, 12
+            dc.w    18, 15
+            dc.w    12, 18
+            dc.w    12, 12
             dc.w    0
 
 p2font_s:   dc.w    45

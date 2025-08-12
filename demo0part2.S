@@ -126,11 +126,8 @@ p2loop:     ;; Double buffering
             move.l  a1, BLTDPT(a6)
             move.w  #(85<<6+20), BLTSIZE(a6)
 
-            subq.w   #5, p2polyoffset
-            cmp.w   #-800, p2polyoffset
-            bgt.s   .polyoffsetdone
-            add.w   #1120, p2polyoffset
-.polyoffsetdone:
+            move.w  p2speed, d0
+            sub.w   d0, p2polyoffset
 
 .countdown: lea     p2frame, a4
             move.w  (a4), d0
@@ -142,12 +139,12 @@ p2loop:     ;; Double buffering
             move.w  d0, d1
             sub.w   #100, d1
             bmi.s   .jittersetdone
-            and.w   #56, d1
+            and.w   #112, d1
             move.w  d1, d2
-            and.w   #48, d2
-            and.w   #8, d1
+            and.w   #96, d2
+            and.w   #16, d1
             beq.s   .jitterclear
-            cmp.w   #16, d2
+            cmp.w   #32, d2
             beq.s   .jitterclear
             move.w  #1, p2jitter
             bra.s   .jittersetdone
@@ -332,16 +329,13 @@ p2jitter:   dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
             dc.w    325
-p2speed:    dc.w    7
+p2speed:    dc.w    3
             ;;      Backslash is a kerning helper
 p2text:     ;dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
             dc.b    "AFTER 30 YEARS, "
             dc.b    "IT'S F\INALLY "
-            dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE!"
-            dc.b    "  "
-            dc.b    "CODE B\Y ORION"
-            dc.b    ", "
-            dc.b    "F\ONT B\Y ORION"
+            dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE B\Y ORION OF DEF\IANCE!"
+            dc.b    0
             CNOP    0, 2
 
             INCLUDE "demo0part2font.S"
@@ -370,25 +364,32 @@ p2sine:
 
             SECTION copper, DATA_C
 
+EDGE:       equ     $0000
+FILL:       equ     $0fff
+ABOVE:      equ     $0feb
+BACK:       equ     $0cb7
+AA_FILL:    equ     $0777
+AA_BACK:    equ     $0653
+
 p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compatibility
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
                                         ; TODO: DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
-            CMOVE   COLOR0,     $0fff   ; White background
-            CMOVE   COLOR1,     $0777   ; Black foreground
-            CMOVE   COLOR2,     $0777   ; Black foreground
-            CMOVE   COLOR3,     $0000   ; Black foreground
-            CMOVE   COLOR4,     $0777   ; Black foreground
-            CMOVE   COLOR5,     $0000   ; Black foreground
-            CMOVE   COLOR6,     $0000   ; Black foreground
-            CMOVE   COLOR7,     $0777   ; Black foreground
-            CMOVE   COLOR8,     $0777   ; Black foreground
-            CMOVE   COLOR9,     $0000   ; Black foreground
-            CMOVE   COLOR10,    $0000   ; Black foreground
-            CMOVE   COLOR11,    $0777   ; Black foreground
-            CMOVE   COLOR12,    $0000   ; Black foreground
-            CMOVE   COLOR13,    $0777   ; Black foreground
-            CMOVE   COLOR14,    $0777   ; Black foreground
-            CMOVE   COLOR15,    $0fff   ; White foreground
+            CMOVE   COLOR0,     ABOVE
+            CMOVE   COLOR1,     AA_BACK
+            CMOVE   COLOR2,     AA_BACK
+            CMOVE   COLOR3,     EDGE
+            CMOVE   COLOR4,     AA_BACK
+            CMOVE   COLOR5,     EDGE
+            CMOVE   COLOR6,     EDGE
+            CMOVE   COLOR7,     AA_FILL
+            CMOVE   COLOR8,     AA_BACK
+            CMOVE   COLOR9,     EDGE
+            CMOVE   COLOR10,    EDGE
+            CMOVE   COLOR11,    AA_FILL
+            CMOVE   COLOR12,    EDGE
+            CMOVE   COLOR13,    AA_FILL
+            CMOVE   COLOR14,    AA_FILL
+            CMOVE   COLOR15,    FILL
 
 p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPL1PTL,    0
@@ -412,7 +413,7 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
 
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $2200   ; Turn on two bitplanes
-            CMOVE   COLOR0,     $0ccc
+            CMOVE   COLOR0,     BACK
 
             CWAIT   $2d, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
@@ -423,7 +424,7 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   COLOR0,     $0000
 
             CWAIT   $2d, 3
-            CMOVE   COLOR0,     $0fff
+            CMOVE   COLOR0,     ABOVE
 
             CEND                        ; End of copper list
 
