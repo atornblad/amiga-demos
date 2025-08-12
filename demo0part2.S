@@ -126,7 +126,7 @@ p2loop:     ;; Double buffering
             move.l  a1, BLTDPT(a6)
             move.w  #(85<<6+20), BLTSIZE(a6)
 
-            sub.w   #3, p2polyoffset
+            subq.w   #5, p2polyoffset
             cmp.w   #-800, p2polyoffset
             bgt.s   .polyoffsetdone
             add.w   #1120, p2polyoffset
@@ -136,6 +136,25 @@ p2loop:     ;; Double buffering
             move.w  (a4), d0
             addq.w  #1, d0
             move.w  d0, (a4)
+
+            ; TEMPORARY: Jitter
+            ; TODO: Controled by music
+            move.w  d0, d1
+            sub.w   #100, d1
+            bmi.s   .jittersetdone
+            and.w   #56, d1
+            move.w  d1, d2
+            and.w   #48, d2
+            and.w   #8, d1
+            beq.s   .jitterclear
+            cmp.w   #16, d2
+            beq.s   .jitterclear
+            move.w  #1, p2jitter
+            bra.s   .jittersetdone
+.jitterclear:
+            clr.w   p2jitter
+.jittersetdone:
+
             cmp.w   #2500, d0           ; 50 seconds
             bhi.s   .p2done
             clr.w   d0
@@ -176,6 +195,8 @@ p2loop:     ;; Double buffering
             add.w   d4, d3
 
             ; Then a random jitter every 2 frames in one way and every 4 frames in another
+            tst.w   p2jitter
+            beq.s   .nojitter
             move.w  p2frame, d4
             asr.w   #2, d4
             mulu    #17, d4
@@ -191,14 +212,15 @@ p2loop:     ;; Double buffering
             mulu    #7, d5
             eor.w   d5, d4
 
-            and.w   #4, d4
+            and.w   #6, d4
             and.w   #2, d5
             add.w   d4, d2
             add.w   d5, d3
-            subq.w  #2, d2
+            subq.w  #3, d2
             subq.w  #1, d3
 
-            ; Finally, we add d2polyoffset (for now, this will instead by individual by glyph)
+.nojitter:
+            ; Clip to 0..318
             tst.w   d2
             bmi.s   .transformnegative
             cmp.w   #319, d2
@@ -306,13 +328,15 @@ p2textptr:  ds.l    1
             SECTION vars_initialized, DATA
 
 p2frame     dc.w    0
+p2jitter:   dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
             dc.w    325
+p2speed:    dc.w    7
             ;;      Backslash is a kerning helper
 p2text:     ;dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
-            dc.b    "IT'S BEEN 30 YEARS..."
-            dc.b    "^"
+            dc.b    "AFTER 30 YEARS, "
+            dc.b    "IT'S F\INALLY "
             dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE!"
             dc.b    "  "
             dc.b    "CODE B\Y ORION"
