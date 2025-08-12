@@ -152,11 +152,24 @@ p2loop:     ;; Double buffering
 
             ; Then a SINE effect based on the X coordinate
             ; a5 must point to p2sine
+
+            ;; EXPERIMENT:
+            ;; d4 = SIN(frame + x) * (x + CONSTANT) + frame
             move.w  d2, d4
-            lsr.w   #1, d4
             move.w  p2frame, d5
-            lsl.w   #2, d5
+            add.w   #100, d5
             add.w   d5, d4
+            and.W   #255, d4
+            lsl.w   #1, d4
+            move.w  0(a5,d4.w), d4
+            muls.w  d2, d4
+            asr.w   #5, d4
+            add.w   #100, d4
+            add.w   p2frame, d4
+
+
+            ;lsl.w   #2, d5
+            ;add.w   d5, d4
             and.w   #255, d4
             lsl.w   #1, d4
             move.w  0(a5,d4.w), d4
@@ -177,11 +190,12 @@ p2loop:     ;; Double buffering
             add.w   d2, d5
             mulu    #7, d5
             eor.w   d5, d4
-            and.w   #7, d4
-            and.w   #3, d5
+
+            and.w   #4, d4
+            and.w   #2, d5
             add.w   d4, d2
             add.w   d5, d3
-            subq.w  #3, d2
+            subq.w  #2, d2
             subq.w  #1, d3
 
             ; Finally, we add d2polyoffset (for now, this will instead by individual by glyph)
@@ -296,7 +310,14 @@ octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per li
 p2polyoffset:
             dc.w    325
             ;;      Backslash is a kerning helper
-p2text:     dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
+p2text:     ;dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...", 0
+            dc.b    "IT'S BEEN 30 YEARS..."
+            dc.b    "^"
+            dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE!"
+            dc.b    "  "
+            dc.b    "CODE B\Y ORION"
+            dc.b    ", "
+            dc.b    "F\ONT B\Y ORION"
             CNOP    0, 2
 
             INCLUDE "demo0part2font.S"
