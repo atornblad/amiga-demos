@@ -21,7 +21,7 @@ p2loop:     ;; Double buffering
             addq.w  #1, d0
             and.w   d0, d2              ; d2: 0 or 1 - which buffer to draw in
 
-            mulu.w  #40*256, d1
+            mulu.w  #40*85, d1         ; Scroller section is 85 lines high
             add.l   bitmapaddr, d1
             move.w  d1, (p2cprbmps+6)
             move.w  d1, (p2cprbmps+14)
@@ -33,7 +33,7 @@ p2loop:     ;; Double buffering
             move.w  d1, (p2cprbmps+18)
             move.w  d1, (p2cprbmps+26)
 
-            mulu.w  #40*256, d2
+            mulu.w  #40*85, d2
             add.l   bitmapaddr, d2
 
             ;; CLEAR THE SCREEN
@@ -418,6 +418,9 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
 
             CWAIT   $2d, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
+
+            CWAIT   $81, 3
+            CMOVE   BPLCON0,    $0200   ; Turn off all bitplanes
 
             CPALWAIT
             CWAIT   $2c, 3
