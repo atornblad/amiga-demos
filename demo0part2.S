@@ -6,6 +6,7 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             move.w  d0, (p2cprbmps+2)
 
             move.l  #p2copper, COP1LC(a6)
+            move.l  #p2cprbmps, COP2LC(a6)
             clr.w   COPJMP1(a6)
             
             lea     p2sine, a5
@@ -13,7 +14,16 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
 
             rts
 
-p2loop:     ;; Double buffering
+p2loop:     ;; Which copper list?
+            tst.w   p2usealtcopper
+            bne.s   .usealtcopper
+            move.l  #p2copper, COP1LC(a6)
+            bra.s   .usecopperdone
+.usealtcopper:
+            move.l  #p2altcopper, COP1LC(a6)
+.usecopperdone:
+
+            ;; Double buffering
             move.w  p2frame, d0
             moveq   #1, d1
             moveq   #1, d2
@@ -133,6 +143,12 @@ p2loop:     ;; Double buffering
             move.w  (a4), d0
             addq.w  #1, d0
             move.w  d0, (a4)
+
+            ; TEMPORARY: switch between coppers
+            move.w  d0, d1
+            add.w   #17, d1
+            and.w   #64, d1
+            move.w  d1, p2usealtcopper
 
             ; TEMPORARY: Jitter
             ; TODO: Controled by music
@@ -326,6 +342,8 @@ p2textptr:  ds.l    1
 
 p2frame     dc.w    0
 p2jitter:   dc.w    0
+p2usealtcopper:
+            dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
             dc.w    325
@@ -367,15 +385,17 @@ p2sine:
 
 EDGE:       equ     $0000
 FILL:       equ     $0fff
-ABOVE:      equ     $0feb
+SHADOW:     equ     $0e3c
 BACK:       equ     $0cb7
+BACK2:      equ     $0129
 AA_FILL:    equ     $0777
 AA_BACK:    equ     $0653
 
 p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compatibility
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
                                         ; TODO: DIWSTRT, DIWSTOP, DDFSTRT, DDFSTOP
-            CMOVE   COLOR0,     ABOVE
+p2edgecolorscopper:
+            CMOVE   COLOR0,     BACK
             CMOVE   COLOR1,     AA_BACK
             CMOVE   COLOR2,     AA_BACK
             CMOVE   COLOR3,     EDGE
@@ -392,6 +412,29 @@ p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compati
             CMOVE   COLOR14,    AA_FILL
             CMOVE   COLOR15,    FILL
 
+            CMOVE   COPJMP2,    1       ; Skip the alternative colors
+
+p2altcopper: CMOVE  FMODE,      $0000
+            CMOVE   BPLCON0,    $0200
+p2shadowcolorscopper:
+            ; Alternative color scheme with a drop shadow
+            CMOVE   COLOR0,     BACK2
+            CMOVE   COLOR1,     FILL
+            CMOVE   COLOR2,     BACK2
+            CMOVE   COLOR3,     FILL
+            CMOVE   COLOR4,     BACK2
+            CMOVE   COLOR5,     FILL
+            CMOVE   COLOR6,     BACK2   ; Weird combination of bits
+            CMOVE   COLOR7,     FILL
+            CMOVE   COLOR8,     SHADOW
+            CMOVE   COLOR9,     BACK2   ; Weird combination of bits
+            CMOVE   COLOR10,    SHADOW
+            CMOVE   COLOR11,    FILL
+            CMOVE   COLOR12,    SHADOW
+            CMOVE   COLOR13,    FILL
+            CMOVE   COLOR14,    SHADOW
+            CMOVE   COLOR15,    FILL
+
 p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPL1PTL,    0
             CMOVE   BPL2PTH,    0
@@ -406,17 +449,13 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
 
             CMOVE   BPL1MOD,    0       ; Odd bitplane modulo
             CMOVE   BPL2MOD,    0       ; Even bitplane modulo
-            CMOVE   BPLCON1,    $0010   ; Shift even bitplanes one pixel to the right
+            CMOVE   BPLCON1,    $0020   ; Shift even bitplanes one pixel to the right
             CMOVE   BPLCON2,    $0024   ; Sprites take precedent over bitplanes
-
-            CWAIT   $2b, 3
-            CMOVE   COLOR0,     $0000
 
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $2200   ; Turn on two bitplanes
-            CMOVE   COLOR0,     BACK
 
-            CWAIT   $2d, 3
+            CWAIT   $2e, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
 
             CWAIT   $81, 3
@@ -425,10 +464,6 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CPALWAIT
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes (0 bitplanes on)
-            CMOVE   COLOR0,     $0000
-
-            CWAIT   $2d, 3
-            CMOVE   COLOR0,     ABOVE
 
             CEND                        ; End of copper list
 
