@@ -1,8 +1,11 @@
+USE_MATH    EQU         1
+
             INCLUDE     "startup.S"
             INCLUDE     "demo0init.S"
             INCLUDE     "demo0exit.S"
             ;INCLUDE     "demo0part1.S"
             INCLUDE     "demo0part2.S"
+            INCLUDE     "algomusic.S"
 
 ******************************************************************
 *** MAIN
@@ -23,6 +26,8 @@ demopart:   move.l  partptr, a4         ; Get the init jump address of the curre
 
 demoloop:   jsr     wait136             ; Wait for raster line $136 (end of screen) (a4 not destroyed)
             move.l  a4, -(sp)           ; Store the part section pointer
+            jsr     musictick           ; Do music
+            move.l  (sp), a4            ; Restore a4, just in case
             addq.l  #4, a4              ; Move a4 forward to the next jump pointer (current part loop subroutine)
             move.l  (a4), a4            ; Get the loop jump address of the current part section
             jsr     (a4)                ; Jump to it
@@ -46,14 +51,19 @@ demoloop:   jsr     wait136             ; Wait for raster line $136 (end of scre
             bra.s   demopart            ; And go back up to demopart, so that we can call the init
 
 
+null_loop:  clr.w   d0                  ; This is a "do nothing" demo loop, only music is running
+            rts
 
+no_loop:    moveq.l #1, d0              ; This is an "exit immediately" demo loop
+            rts
 
             SECTION vars_initialized, DATA
 
 btn_state:  dc.w    0
 partptr:    dc.l    parts
 
-parts:      ;dc.l    p1init, p1loop      ; This is just for experimentation
+parts:      dc.l    musicinit, no_loop    ; For initialization of music (and testing)
+            ;dc.l    p1init, p1loop      ; This is just for experimentation
             dc.l    p2init, p2loop      ; This is the real "part 1"
             dc.l    0
 
