@@ -1,11 +1,9 @@
-USE_MATH    EQU         1
 
             INCLUDE     "startup.S"
             INCLUDE     "demo0init.S"
             INCLUDE     "demo0exit.S"
             ;INCLUDE     "demo0part1.S"
             INCLUDE     "demo0part2.S"
-            INCLUDE     "algomusic.S"
 
 ******************************************************************
 *** MAIN
@@ -19,14 +17,16 @@ demopart:   move.l  partptr, a4         ; Get the init jump address of the curre
             tst.l   d0                  ; Is it null?
             bne.s   .initpart           ; If not null, jump to it
             rts                         ; But if null, exit the whole demo!
-.initpart:  move.l  d0, a3              ; Move to an address register so that we can jump to it
+.initpart:  cmp.l   #NO_INIT, d0
+            beq.s   .nopartinit
+            move.l  d0, a3              ; Move to an address register so that we can jump to it
             move.l  a4, -(sp)           ; Store the part section pointer
             jsr     (a3)                ; Jump to the demo part init subroutine
             move.l  (sp)+, a4           ; Pull the part section pointer
+.nopartinit:
 
 demoloop:   jsr     wait136             ; Wait for raster line $136 (end of screen) (a4 not destroyed)
             move.l  a4, -(sp)           ; Store the part section pointer
-            jsr     musictick           ; Do music
             move.l  (sp), a4            ; Restore a4, just in case
             addq.l  #4, a4              ; Move a4 forward to the next jump pointer (current part loop subroutine)
             move.l  (a4), a4            ; Get the loop jump address of the current part section
@@ -62,9 +62,13 @@ no_loop:    moveq.l #1, d0              ; This is an "exit immediately" demo loo
 btn_state:  dc.w    0
 partptr:    dc.l    parts
 
-parts:      dc.l    musicinit, no_loop    ; For initialization of music (and testing)
-            ;dc.l    p1init, p1loop      ; This is just for experimentation
-            dc.l    p2init, p2loop      ; This is the real "part 1"
+NO_INIT:    equ     $ffffffff
+
+parts:      ;dc.l    p1init, p1loop      ; This is just for experimentation
+            dc.l    p2init, p2in
+            dc.l    NO_INIT, p2loop      ; Kinda large shaky vector scroll
+            dc.l    NO_INIT, p2out      ; Fade out to black
+            ;dc.l    p3init, p3loop      ; 
             dc.l    0
 
 

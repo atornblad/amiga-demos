@@ -61,6 +61,8 @@ AUD0LEN:        equ $0a4
 AUD0PER:        equ $0a6
 AUD0VOL:        equ $0a8
 AUD1LC:         equ $0b0
+AUD1LEN:        equ $0b4
+AUD1PER:        equ $0b6
 AUD1VOL:        equ $0b8
 AUD2LC:         equ $0c0
 AUD2VOL:        equ $0c8
@@ -244,7 +246,7 @@ wait136:
             move.w  #$135, d0               ; Wait for line $135
 waitlined0:
 .waitrast:  move.l  VPOSR(a6), d1
-            ; move.w  d1, COLOR0(a6)          ; Debug
+            ;move.w  d1, COLOR0(a6)          ; Debug
             lsr.l   #8, d1
             and.w   #$1ff, d1
             cmp.w   d0, d1

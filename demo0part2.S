@@ -12,16 +12,103 @@ p2init:     move.l  bitmapaddr, d0      ; Set the bitmap address in the copper l
             lea     p2sine, a5
             move.l  #p2text, p2textptr
 
+            ;; INITIAL BITPLANE ADDRESSES
+            move.l   bitmapaddr, d1
+            move.w  d1, (p2cprbmps+6)
+            move.w  d1, (p2cprbmps+14)
+            move.w  d1, (p2cprbmps+22)
+            move.w  d1, (p2cprbmps+30)
+            swap    d1
+            move.w  d1, (p2cprbmps+2)
+            move.w  d1, (p2cprbmps+10)
+            move.w  d1, (p2cprbmps+18)
+            move.w  d1, (p2cprbmps+26)
+            swap    d1
+
+            ;; CLEAR THE SCREEN
+            jsr     waitblit
+
+            ; These four pokes are harmless for the clear, but necessary for the line and fill
+            moveq   #-1, d7
+            move.w  #$8000, BLTADAT(a6)
+            move.w  d7, BLTBDAT(a6) ; ffff
+            move.w  d7, BLTAFWM(a6) ; ffff
+            move.w  d7, BLTALWM(a6) ; ffff
+
+            move.l  d1, BLTDPT(a6)
+            move.w  #$0100, BLTCON0(a6)         ; Use only D channel (destination), zero minterm
+            move.w  #$0000, BLTCON1(a6)
+            move.w  #0, BLTDMOD(a6)             ; No modulo
+            move.w  #(85<<6+20), BLTSIZE(a6)    ; 84 rows by 20 words cleared, starts blitter
+
+            rts
+
+p2in:       move.w  p2incount, d4
+            moveq.l #P2INCYCLES, d0
+            sub.w   d4, d0
+            moveq.l #BACK_R, d1
+            mulu    d0, d1
+            divu    #P2INCYCLES, d1
+            moveq.l #BACK_G, d2
+            mulu    d0, d2
+            divu    #P2INCYCLES, d2
+            moveq.l #BACK_B, d3
+            mulu    d0, d3
+            divu    #P2INCYCLES, d3
+            and.w   #$00f, d1
+            lsl.w   #8, d1
+            and.w   #$00f, d2
+            lsl.w   #4, d2
+            and.w   #$00f, d3
+            or.w    d2, d1
+            or.w    d3, d1
+            move.w  d1, p2edgecolorscopper+2
+
+            subq.w  #1, d4
+            move.w  d4, p2incount
+            tst.w   d4
+            beq.s   .exit
+            clr.w   d0
+            rts
+.exit       moveq.l #1, d0
+            rts
+
+p2out:      move.w  p2outcount, d0
+            moveq.l #BACK_R, d1
+            mulu    d0, d1
+            divu    #P2OUTCYCLES, d1
+            moveq.l #BACK_G, d2
+            mulu    d0, d2
+            divu    #P2OUTCYCLES, d2
+            moveq.l #BACK_B, d3
+            mulu    d0, d3
+            divu    #P2OUTCYCLES, d3
+            and.w   #$00f, d1
+            lsl.w   #8, d1
+            and.w   #$00f, d2
+            lsl.w   #4, d2
+            and.w   #$00f, d3
+            or.w    d2, d1
+            or.w    d3, d1
+            move.w  d1, p2edgecolorscopper+2
+
+            subq.w  #1, d0
+            move.w  d0, p2outcount
+            tst.w   d0
+            beq.s   .exit
+            clr.w   d0
+            rts
+.exit       moveq.l #1, d0
             rts
 
 p2loop:     ;; Which copper list?
-            tst.w   p2usealtcopper
-            bne.s   .usealtcopper
-            move.l  #p2copper, COP1LC(a6)
-            bra.s   .usecopperdone
-.usealtcopper:
-            move.l  #p2altcopper, COP1LC(a6)
-.usecopperdone:
+;            tst.w   p2usealtcopper
+;            bne.s   .usealtcopper
+;            move.l  #p2copper, COP1LC(a6)
+;            bra.s   .usecopperdone
+;.usealtcopper:
+;            move.l  #p2altcopper, COP1LC(a6)
+;.usecopperdone:
 
             ;; Double buffering
             move.w  p2frame, d0
@@ -145,10 +232,10 @@ p2loop:     ;; Which copper list?
             move.w  d0, (a4)
 
             ; TEMPORARY: switch between coppers
-            move.w  d0, d1
-            add.w   #17, d1
-            and.w   #64, d1
-            move.w  d1, p2usealtcopper
+            ;move.w  d0, d1
+            ;add.w   #17, d1
+            ;and.w   #64, d1
+            ;move.w  d1, p2usealtcopper
 
             ; TEMPORARY: Jitter
             ; TODO: Controled by music
@@ -193,20 +280,27 @@ p2loop:     ;; Which copper list?
             add.w   d5, d4
             and.W   #255, d4
             lsl.w   #1, d4
-            move.w  0(a5,d4.w), d4
+            move.w  (a5,d4.w), d4
             muls.w  d2, d4
             asr.w   #5, d4
             add.w   #100, d4
             add.w   p2frame, d4
 
-
             ;lsl.w   #2, d5
             ;add.w   d5, d4
             and.w   #255, d4
             lsl.w   #1, d4
-            move.w  0(a5,d4.w), d4
+            move.w  (a5,d4.w), d4
             add.w   d4, d3
 
+            ;; EXPERIMENT 2:
+            ; x = x * (x + 512 - 160) / (512 + 160)
+            move.w  d2, d4
+            add     #512-160, d4
+            muls    d4, d2
+            divs    #512+160, d2
+
+            bra.s   .nojitter
             ; Then a random jitter every 2 frames in one way and every 4 frames in another
             tst.w   p2jitter
             beq.s   .nojitter
@@ -302,7 +396,7 @@ p2loop:     ;; Which copper list?
             ; d7 = 2: Octant 7 (value 4) ---- ---- ---1 00-1 $0011
             ; d7 = 3: Octant 4 (value 5) ---- ---- ---1 01-1 $0013
 
-            move.w  0(a2,d7.w), d1
+            move.w  (a2,d7.w), d1
 
             ; Finally: calculate BLTSIZE d3 << 6 | 2
             addq.w  #1, d3
@@ -340,10 +434,14 @@ p2textptr:  ds.l    1
 
             SECTION vars_initialized, DATA
 
+P2INCYCLES  equ     27
+P2OUTCYCLES  equ     27
 p2frame     dc.w    0
 p2jitter:   dc.w    0
-p2usealtcopper:
-            dc.w    0
+p2incount: dc.w    P2INCYCLES
+p2outcount: dc.w    P2OUTCYCLES
+;p2usealtcopper:
+;            dc.w    0
 octants     dc.w    $0001+2, $0009+2, $0011+2, $0015+2  ; 2 == SINGLE dot per line
 p2polyoffset:
             dc.w    325
@@ -390,6 +488,9 @@ BACK:       equ     $0cb7
 BACK2:      equ     $0129
 AA_FILL:    equ     $0777
 AA_BACK:    equ     $0653
+BACK_R:     equ     $0c
+BACK_G:     equ     $0b
+BACK_B:     equ     $07
 
 p2copper:   CMOVE   FMODE,      $0000   ; Enable slow fetch mode for AGA compatibility
             CMOVE   BPLCON0,    $0200   ; Turn off bitplanes
@@ -412,28 +513,28 @@ p2edgecolorscopper:
             CMOVE   COLOR14,    AA_FILL
             CMOVE   COLOR15,    FILL
 
-            CMOVE   COPJMP2,    1       ; Skip the alternative colors
+;            CMOVE   COPJMP2,    1       ; Skip the alternative colors
 
-p2altcopper: CMOVE  FMODE,      $0000
-            CMOVE   BPLCON0,    $0200
-p2shadowcolorscopper:
-            ; Alternative color scheme with a drop shadow
-            CMOVE   COLOR0,     BACK2
-            CMOVE   COLOR1,     FILL
-            CMOVE   COLOR2,     BACK2
-            CMOVE   COLOR3,     FILL
-            CMOVE   COLOR4,     BACK2
-            CMOVE   COLOR5,     FILL
-            CMOVE   COLOR6,     BACK2   ; Weird combination of bits
-            CMOVE   COLOR7,     FILL
-            CMOVE   COLOR8,     SHADOW
-            CMOVE   COLOR9,     BACK2   ; Weird combination of bits
-            CMOVE   COLOR10,    SHADOW
-            CMOVE   COLOR11,    FILL
-            CMOVE   COLOR12,    SHADOW
-            CMOVE   COLOR13,    FILL
-            CMOVE   COLOR14,    SHADOW
-            CMOVE   COLOR15,    FILL
+;p2altcopper: CMOVE  FMODE,      $0000
+;            CMOVE   BPLCON0,    $0200
+;p2shadowcolorscopper:
+;            ; Alternative color scheme with a drop shadow
+;            CMOVE   COLOR0,     BACK2
+;            CMOVE   COLOR1,     FILL
+;            CMOVE   COLOR2,     BACK2
+;            CMOVE   COLOR3,     FILL
+;            CMOVE   COLOR4,     BACK2
+;            CMOVE   COLOR5,     FILL
+;            CMOVE   COLOR6,     BACK2   ; Weird combination of bits
+;            CMOVE   COLOR7,     FILL
+;            CMOVE   COLOR8,     SHADOW
+;            CMOVE   COLOR9,     BACK2   ; Weird combination of bits
+;            CMOVE   COLOR10,    SHADOW
+;            CMOVE   COLOR11,    FILL
+;            CMOVE   COLOR12,    SHADOW
+;            CMOVE   COLOR13,    FILL
+;            CMOVE   COLOR14,    SHADOW
+;            CMOVE   COLOR15,    FILL
 
 p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPL1PTL,    0
