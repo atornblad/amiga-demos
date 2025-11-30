@@ -1,6 +1,8 @@
 
             SECTION vars_initialized, DATA
 
+            EVEN
+
 p2font:     dc.l    p2fontnull          ; SPACE
             dc.l    p2font_exc          ; !
             dc.l    p2fontnull          ; "

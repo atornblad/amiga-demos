@@ -110,6 +110,19 @@ p2loop:     ;; Which copper list?
 ;            move.l  #p2altcopper, COP1LC(a6)
 ;.usecopperdone:
 
+            ;; Move scroll slowly up/down
+            move.w  p2frame, d0
+            and.w   #255, d0
+            lsl.w   #1, d0
+            lea     p2sine, a3
+            move.w  (a3,d0.w), d0
+            add.w   #$50, d0
+            move.b  d0, p2topwait
+            addq.w  #2, d0
+            move.b  d0, p2topwait2
+            add.w   #$81-$2b,d0
+            move.b  d0, p2endwait
+
             ;; Double buffering
             move.w  p2frame, d0
             moveq   #1, d1
@@ -269,11 +282,11 @@ p2loop:     ;; Which copper list?
             ; Add 18 px to y offset
             add.w   #18, d3
 
-            ; Then a SINE effect based on the X coordinate
+            ; Then a SINE effect based on the X and Y coordinate
             ; a5 must point to p2sine
 
             ;; EXPERIMENT:
-            ;; d4 = SIN(frame + x) * (x + CONSTANT) + frame
+            ;; d4 = SIN(frame + x) * (y + CONSTANT) + frame
             move.w  d2, d4
             move.w  p2frame, d5
             add.w   #100, d5
@@ -281,7 +294,10 @@ p2loop:     ;; Which copper list?
             and.W   #255, d4
             lsl.w   #1, d4
             move.w  (a5,d4.w), d4
-            muls.w  d2, d4
+            ;muls.w  d2, d4
+            move.w  d3, d5
+            asl.w   #1, d5
+            muls.w  d5, d4
             asr.w   #5, d4
             add.w   #100, d4
             add.w   p2frame, d4
@@ -294,11 +310,11 @@ p2loop:     ;; Which copper list?
             add.w   d4, d3
 
             ;; EXPERIMENT 2:
-            ; x = x * (x + 512 - 160) / (512 + 160)
+            ; x = x * (x + 256 - 160) / (256 + 160)
             move.w  d2, d4
-            add     #512-160, d4
+            add     #256-160, d4
             muls    d4, d2
-            divs    #512+160, d2
+            divs    #256+160, d2
 
             bra.s   .nojitter
             ; Then a random jitter every 2 frames in one way and every 4 frames in another
@@ -436,6 +452,8 @@ p2textptr:  ds.l    1
 
 P2INCYCLES  equ     27
 P2OUTCYCLES  equ     27
+
+            EVEN
 p2frame     dc.w    0
 p2jitter:   dc.w    0
 p2incount: dc.w    P2INCYCLES
@@ -453,13 +471,14 @@ p2text:     ;dc.b    "INTRO B\Y DEFIANCE... CODE B\Y ORION... F\ONT B\Y ORION...
             dc.b    "TIME F\OR SOME NEW OLD-SCHOOL CODE "
             dc.b    "B\Y ORION OF DEF\IANCE!"
             dc.b    0
-            CNOP    0, 2
 
             INCLUDE "demo0part2font.S"
 
 ; Sine table for Amiga demo
 ; Values are scaled to fit in -15 to 15 range
 ; Table contains 256 entries, each entry is a signed word (dc.w)
+
+            EVEN
 
 p2sine:
             dc.w    0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5
@@ -553,12 +572,15 @@ p2cprbmps:  CMOVE   BPL1PTH,    0       ; Placeholder for bitplane addresses
             CMOVE   BPLCON1,    $0020   ; Shift even bitplanes one pixel to the right
             CMOVE   BPLCON2,    $0024   ; Sprites take precedent over bitplanes
 
+p2topwait:
             CWAIT   $2c, 3
             CMOVE   BPLCON0,    $2200   ; Turn on two bitplanes
 
+p2topwait2:
             CWAIT   $2e, 3
             CMOVE   BPLCON0,    $4200   ; Turn on four bitplanes
 
+p2endwait:
             CWAIT   $81, 3
             CMOVE   BPLCON0,    $0200   ; Turn off all bitplanes
 
